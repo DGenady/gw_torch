@@ -7,6 +7,7 @@ from io import BytesIO
 import numpy as np
 from torchvision import models
 import time
+from resnetNoBN import resnet50NoBN
 
 class Tripletnet(nn.Module):
     def __init__(self, embeddingnet):
@@ -18,35 +19,12 @@ class Tripletnet(nn.Module):
         embedded_y = self.embeddingnet(y)
         embedded_z = self.embeddingnet(z)
         return embedded_x, embedded_y, embedded_z
-    
+
 class Net(nn.Module):
     def __init__(self):
-        super(Net, self).__init__()
-        self.conv1 = nn.Conv2d(3, 64, kernel_size=5)
-        self.conv2 = nn.Conv2d(64, 128, kernel_size=5)
-        self.conv3 = nn.Conv2d(128, 256, kernel_size=3)
-        self.conv4 = nn.Conv2d(256, 512, kernel_size=3)
-        
-        self.fc1 = nn.Linear(512, 256)
-        self.fc2 = nn.Linear(256, 128)
-        self.fc3 = nn.Linear(128,32)
-
-    def forward(self, x):
-        x = F.relu(F.max_pool2d(self.conv1(x), 2))
-        x = F.relu(F.max_pool2d(self.conv2(x), 2))
-        x = F.relu(F.max_pool2d(self.conv3(x), 2))
-        x = F.relu(F.max_pool2d(self.conv4(x), 2))
-        x = F.max_pool2d(x, kernel_size=x.size()[2:])
-        x = torch.squeeze(x)
-        x = F.relu(self.fc1(x),2)
-        x = F.relu(self.fc2(x),2)
-        return F.relu(self.fc3(x),2)
-    
-    
-class Net2(nn.Module):
-    def __init__(self):
         super(Net2, self).__init__()
-        resnet = models.resnet50(pretrained=True)
+        #resnet = models.resnet50(pretrained=True)
+        resnet =  resnet50NoBN(pretrained=True)
         self.resNet = nn.Sequential(*(list(resnet.children())[:-1]))
         self.dimRed = nn.Sequential(nn.Linear(2048,1024),nn.ReLU(),nn.Linear(1024,512),nn.ReLU(),nn.Linear(512,256),
                                     nn.ReLU(),nn.Linear(256,128),nn.ReLU(),nn.Linear(128,32))
@@ -55,29 +33,15 @@ class Net2(nn.Module):
         x = torch.squeeze(x)
         return self.dimRed(x)
 
-start_time = time.perf_counter()
-
-s3 = boto3.resource('s3',endpoint_url = 'https://s3-west.nrp-nautilus.io')
-    
-device = "cuda" if torch.cuda.is_available() else "cpu"
-print(f"Using {device} device")
-
-model = Net2()
-tnet = Tripletnet(model).to(device)
-
-loss_fn = nn.TripletMarginLoss(margin=10.0, p=2)
-optimizer = torch.optim.Adam(tnet.parameters(), lr=1e-6)
-scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
-
 def train(numOfFiles, numOfSamples, batchsize, model, loss_fn, optimizer, filePath):
     train_ind = 0 
     size = numOfFiles*numOfSamples//batchsize
     losses = []
     model.train()
-   
     for file in range(numOfFiles):
         data = loadFile(path=filePath, num=file, s3obj=s3)
         for batch in range(numOfSamples//batchsize):
+            optimizer.zero_grad()
             img1, img2, img3 = getBatchData(data,batch,batchsize) 
             img1, img2, img3 = img1.to(device), img2.to(device), img3.to(device)
             
@@ -86,11 +50,10 @@ def train(numOfFiles, numOfSamples, batchsize, model, loss_fn, optimizer, filePa
             loss = loss_fn(emb1,emb2,emb3) + 0.001*(emb1.norm(2)+emb2.norm(2)+emb3.norm(2))
             
             # Backpropagation
-            optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-            
             losses.append(loss.item())
+            
         
     return np.mean(np.asarray(losses))
 
@@ -99,14 +62,11 @@ def test(firstFile,lastFile, numOfSamples, batchsize, model, loss_fn, filePath):
     losses = []
     model.eval()
     
-    for m in model.modules():
-        for child in m.children():
-            if type(child) == nn.BatchNorm2d:
-                child.track_running_stats = False
-                child.running_mean = None
-                child.running_var = None
-
-   
+    #for m in model.modules():
+    #    for child in m.children():
+    #        if type(child) == nn.BatchNorm2d:
+    #            child.track_running_stats = False
+    
     with torch.no_grad():
         for file in range(firstFile, lastFile):
             data = loadFile(path=filePath, num=file, s3obj=s3)
@@ -127,7 +87,8 @@ def loadFile(path, num, s3obj):
                        allow_pickle=True)
     data = torch.from_numpy(data)
     data = torch.permute(data,(0,1,4,2,3))
-    return data.float()
+    data = data.float()
+    return data/255
 
 def load_to_bytes(s3,s3_uri:str):
     parsed_s3 = urlparse(s3_uri)
@@ -143,18 +104,33 @@ def getBatchData(data,batchNum,batchsize):
     imgs3 = data[batchNum*batchsize:(batchNum+1)*batchsize,2,:,:,:]
     return imgs1, imgs2 , imgs3
         
+start_time = time.perf_counter()
 
-epochs = 10
+noiseLvl = '001'
+
+s3 = boto3.resource('s3',endpoint_url = 'https://s3-west.nrp-nautilus.io')
+    
+device = "cuda" if torch.cuda.is_available() else "cpu"
+print(f"Using {device} device")
+
+model = Net()
+tnet = Tripletnet(model).to(device)
+
+loss_fn = nn.TripletMarginLoss(margin=10.0, p=2)
+optimizer = torch.optim.Adam(tnet.parameters(), lr=1e-7)
+scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
+
+epochs = 20
 losses = np.empty((2,epochs))
 for t in range(epochs):
     print(f"Epoch {t+1}\n-------------------------------")
     losses[0,t] = train(numOfFiles=40, numOfSamples=1000, batchsize=50, model=tnet, loss_fn=loss_fn, optimizer=optimizer, 
-                        filePath='triplet_noise/noise010/file')
+                        filePath=f'triplet_noise/noise{noiseLvl}/file')
     losses[1,t] = test(firstFile=40,lastFile=50, numOfSamples=1000, batchsize=50, model=tnet, loss_fn=loss_fn, 
-                       filePath='triplet_noise/noise010/file')
+                       filePath=f'triplet_noise/noise{noiseLvl}/file')
     print(f'Train loss: {losses[0,t]:>4f} Val loss: {losses[1,t]:>4f}')
     scheduler.step()
     
-torch.save(model.state_dict(),'/home/jovyan/models/torch/TorchMod10.pt')
-np.save('/home/jovyan/models/torch/Mod10noise.npy', losses, allow_pickle=True)
+torch.save(model.state_dict(),f'Netnoise{noiseLvl}.pt')
+np.save(f'noise{noiseLvl}loss.npy', losses, allow_pickle=True)
 print('Done in {} hours'.format((time.perf_counter()-start_time)/3600))
