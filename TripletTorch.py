@@ -22,7 +22,7 @@ class Tripletnet(nn.Module):
 
 class Net(nn.Module):
     def __init__(self):
-        super(Net2, self).__init__()
+        super(Net, self).__init__()
         #resnet = models.resnet50(pretrained=True)
         resnet =  resnet50NoBN(pretrained=True)
         self.resNet = nn.Sequential(*(list(resnet.children())[:-1]))
