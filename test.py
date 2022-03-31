@@ -27,7 +27,7 @@ def load_to_bytes(s3,s3_uri:str):
     f.seek(0)
     return f
 
-data = loadfile(path='triplet_noise/noise010/file',num=0,s3obj=s3)
+data = loadFile(path='triplet_noise/noise010/file',num=0,s3obj=s3)
 if data is not None:
   print('data loaded')
   
