@@ -106,6 +106,8 @@ def getBatchData(data,batchNum,batchsize):
         
 start_time = time.perf_counter()
 
+print('TripletData.py trains the model on real data(no noise) ')
+
 s3 = boto3.resource('s3',endpoint_url = 'https://s3-west.nrp-nautilus.io')
     
 device = "cuda" if torch.cuda.is_available() else "cpu"
