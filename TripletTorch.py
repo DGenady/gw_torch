@@ -120,7 +120,7 @@ loss_fn = nn.TripletMarginLoss(margin=10.0, p=2)
 optimizer = torch.optim.Adam(tnet.parameters(), lr=1e-7)
 scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
 
-epochs = 20
+epochs = 50
 losses = np.empty((2,epochs))
 for t in range(epochs):
     print(f"Epoch {t+1}\n-------------------------------")
