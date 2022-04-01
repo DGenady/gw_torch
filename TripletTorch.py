@@ -131,6 +131,6 @@ for t in range(epochs):
     print(f'Train loss: {losses[0,t]:>4f} Val loss: {losses[1,t]:>4f}')
     scheduler.step()
     
-torch.save(model.state_dict(),f'Netnoise{noiseLvl}.pt')
-np.save(f'noise{noiseLvl}loss.npy', losses, allow_pickle=True)
+torch.save(model.state_dict(),f'Netnoise{noiseLvl}part2.pt')
+np.save(f'noise{noiseLvl}losspart2.npy', losses, allow_pickle=True)
 print('Done in {} hours'.format((time.perf_counter()-start_time)/3600))
