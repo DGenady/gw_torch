@@ -118,19 +118,19 @@ tnet = Tripletnet(model).to(device)
 
 loss_fn = nn.TripletMarginLoss(margin=10.0, p=2)
 optimizer = torch.optim.Adam(tnet.parameters(), lr=1e-7)
-scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
+scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.97)
 
 epochs = 50
 losses = np.empty((2,epochs))
 for t in range(epochs):
     print(f"Epoch {t+1}\n-------------------------------")
-    losses[0,t] = train(numOfFiles=80, numOfSamples=1000, batchsize=50, model=tnet, loss_fn=loss_fn, optimizer=optimizer, 
+    losses[0,t] = train(numOfFiles=150, numOfSamples=1000, batchsize=50, model=tnet, loss_fn=loss_fn, optimizer=optimizer, 
                         filePath=f'triplet_noise/noise{noiseLvl}/file')
-    losses[1,t] = test(firstFile=80,lastFile=90, numOfSamples=1000, batchsize=50, model=tnet, loss_fn=loss_fn, 
+    losses[1,t] = test(firstFile=150,lastFile=160, numOfSamples=1000, batchsize=50, model=tnet, loss_fn=loss_fn, 
                        filePath=f'triplet_noise/noise{noiseLvl}/file')
     print(f'Train loss: {losses[0,t]:>4f} Val loss: {losses[1,t]:>4f}')
     scheduler.step()
     
-torch.save(model.state_dict(),f'Netnoise{noiseLvl}part2.pt')
-np.save(f'noise{noiseLvl}losspart2.npy', losses, allow_pickle=True)
+torch.save(model.state_dict(),f'Netnoise{noiseLvl}part3.pt')
+np.save(f'noise{noiseLvl}losspart3.npy', losses, allow_pickle=True)
 print('Done in {} hours'.format((time.perf_counter()-start_time)/3600))
