@@ -20,7 +20,7 @@ parser.add_argument('--epochs', type=int, default=10, metavar='N',
 parser.add_argument('--lr', type=float, default=1e-7, metavar='LR',
                     help='learning rate (default: 1e-7)')
 parser.add_argument('--margin', type=float, default=10, metavar='M',
-                    help='margin for triplet loss (default: 0.2)')
+                    help='margin for triplet loss (default: 10)')
 parser.add_argument('--name', default='TripletNet', type=str,
                     help='name of experiment')
 parser.add_argument('--data-path', default='triplet_data/file', type=str,
