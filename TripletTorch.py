@@ -8,6 +8,29 @@ import numpy as np
 from torchvision import models
 import time
 from resnetNoBN import resnet50NoBN
+import argparse
+
+
+# Training settings
+parser = argparse.ArgumentParser(description='PyTorch Triplet network')
+parser.add_argument('--batch-size', type=int, default=50, metavar='N',
+                    help='input batch size for training (default: 50)')
+parser.add_argument('--epochs', type=int, default=10, metavar='N',
+                    help='number of epochs to train (default: 10)')
+parser.add_argument('--lr', type=float, default=1e-7, metavar='LR',
+                    help='learning rate (default: 1e-7)')
+parser.add_argument('--margin', type=float, default=10, metavar='M',
+                    help='margin for triplet loss (default: 0.2)')
+parser.add_argument('--name', default='TripletNet', type=str,
+                    help='name of experiment')
+parser.add_argument('--data-path', default='triplet_data/file', type=str,
+                    help='folder on s3 containing data')
+parser.add_argument('--save-name', default='model-test', type=str,
+                    help='the name of the saved files')
+parser.add_argument('--file-totrain', default=50, type=int, metavar='N',
+                    help='Number of files to train on')
+
+args = parser.parse_args()
 
 class Tripletnet(nn.Module):
     def __init__(self, embeddingnet):
@@ -34,7 +57,6 @@ class Net(nn.Module):
         return self.dimRed(x)
 
 def train(numOfFiles, numOfSamples, batchsize, model, loss_fn, optimizer, filePath):
-    train_ind = 0 
     size = numOfFiles*numOfSamples//batchsize
     losses = []
     model.train()
@@ -53,19 +75,11 @@ def train(numOfFiles, numOfSamples, batchsize, model, loss_fn, optimizer, filePa
             loss.backward()
             optimizer.step()
             losses.append(loss.item())
-            
-        
     return np.mean(np.asarray(losses))
 
 def test(firstFile,lastFile, numOfSamples, batchsize, model, loss_fn, filePath):
-    train_ind = 0 
     losses = []
     model.eval()
-    
-    #for m in model.modules():
-    #    for child in m.children():
-    #        if type(child) == nn.BatchNorm2d:
-    #            child.track_running_stats = False
     
     with torch.no_grad():
         for file in range(firstFile, lastFile):
@@ -106,8 +120,6 @@ def getBatchData(data,batchNum,batchsize):
         
 start_time = time.perf_counter()
 
-noiseLvl = '001'
-
 s3 = boto3.resource('s3',endpoint_url = 'https://s3-west.nrp-nautilus.io')
     
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -116,21 +128,21 @@ print(f"Using {device} device")
 model = Net()
 tnet = Tripletnet(model).to(device)
 
-loss_fn = nn.TripletMarginLoss(margin=10.0, p=2)
-optimizer = torch.optim.Adam(tnet.parameters(), lr=1e-7)
+loss_fn = nn.TripletMarginLoss(margin=args.margin, p=2)
+optimizer = torch.optim.Adam(tnet.parameters(), lr=args.lr)
 scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.97)
 
-epochs = 50
+epochs = args.epochs
 losses = np.empty((2,epochs))
 for t in range(epochs):
     print(f"Epoch {t+1}\n-------------------------------")
-    losses[0,t] = train(numOfFiles=150, numOfSamples=1000, batchsize=50, model=tnet, loss_fn=loss_fn, optimizer=optimizer, 
-                        filePath=f'triplet_noise/noise{noiseLvl}/file')
-    losses[1,t] = test(firstFile=150,lastFile=160, numOfSamples=1000, batchsize=50, model=tnet, loss_fn=loss_fn, 
-                       filePath=f'triplet_noise/noise{noiseLvl}/file')
+    losses[0,t] = train(numOfFiles=args.file_totrain, numOfSamples=1000, batchsize=args.batch_size, model=tnet, loss_fn=loss_fn, optimizer=optimizer, 
+                        filePath=args.data_path)
+    losses[1,t] = test(firstFile=args.file_totrain,lastFile=args.file_totrain+10, numOfSamples=1000, batchsize=args.batch_size, model=tnet,
+                       loss_fn=loss_fn, filePath=args.data_path)
     print(f'Train loss: {losses[0,t]:>4f} Val loss: {losses[1,t]:>4f}')
     scheduler.step()
     
-torch.save(model.state_dict(),f'Netnoise{noiseLvl}part3.pt')
-np.save(f'noise{noiseLvl}losspart3.npy', losses, allow_pickle=True)
+torch.save(model.state_dict(),f'model_{args.save_name}.pt')
+np.save(f'loss_{args.save_name}.npy', losses, allow_pickle=True)
 print('Done in {} hours'.format((time.perf_counter()-start_time)/3600))
