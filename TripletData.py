@@ -117,16 +117,16 @@ model = Net()
 tnet = Tripletnet(model).to(device)
 
 loss_fn = nn.TripletMarginLoss(margin=10.0, p=2)
-optimizer = torch.optim.Adam(tnet.parameters(), lr=1e-7)
-scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
+optimizer = torch.optim.Adam(tnet.parameters(), lr=1e-6)
+scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.95)
 
 epochs = 50
 losses = np.empty((2,epochs))
 for t in range(epochs):
     print(f"Epoch {t+1}\n-------------------------------")
-    losses[0,t] = train(numOfFiles=150, numOfSamples=1000, batchsize=50, model=tnet, loss_fn=loss_fn, optimizer=optimizer, 
+    losses[0,t] = train(numOfFiles=10, numOfSamples=1000, batchsize=50, model=tnet, loss_fn=loss_fn, optimizer=optimizer, 
                         filePath=f'triplet_data/file')
-    losses[1,t] = test(firstFile=150,lastFile=170, numOfSamples=1000, batchsize=50, model=tnet, loss_fn=loss_fn, 
+    losses[1,t] = test(firstFile=10,lastFile=15, numOfSamples=1000, batchsize=50, model=tnet, loss_fn=loss_fn, 
                        filePath=f'triplet_data/file')
     print(f'Train loss: {losses[0,t]:>4f} Val loss: {losses[1,t]:>4f}')
     scheduler.step()
