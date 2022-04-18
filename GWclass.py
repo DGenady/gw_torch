@@ -132,7 +132,7 @@ myModel = Net()
 myModel.to(device)
 
 loss_fn = nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(tnet.parameters(), lr=args.lr)
+optimizer = torch.optim.Adam(myModel.parameters(), lr=args.lr)
 scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.97)
 
 epochs = args.epochs
