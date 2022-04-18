@@ -107,10 +107,20 @@ def load_to_bytes(s3,s3_uri:str):
     return f
 
 def getBatchData(data,batchNum,batchsize):
-    imgs1 = data[batchNum*batchsize:(batchNum+1)*batchsize,0,:,:,:]
-    imgs2 = data[batchNum*batchsize:(batchNum+1)*batchsize,1,:,:,:]
-    imgs3 = data[batchNum*batchsize:(batchNum+1)*batchsize,2,:,:,:]
-    return imgs1, imgs2 , imgs3
+    h1 = data[batchNum*batchsize:(batchNum+1)*batchsize,0,:,:,:]
+    l1 = data[batchNum*batchsize:(batchNum+1)*batchsize,2,:,:,:]
+    
+    h1l = torch.zeros(batchsize)
+    l1l = torch.zeros(batchsize) + 1
+    
+    labels = torch.cat((h1l,l1l))
+    img = torch.cat((h1,l1))
+    
+    perm = torch.randperm(img.size(0))
+    
+    img = img[perm,:,:,:]
+    labels = labels[perm]
+    return img, labels.type(torch.LongTensor)
         
 start_time = time.perf_counter()
 
