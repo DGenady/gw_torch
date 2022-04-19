@@ -27,18 +27,20 @@ parser.add_argument('--save-name', default='model-test', type=str,
                     help='the name of the saved files')
 parser.add_argument('--file-totrain', default=50, type=int, metavar='N',
                     help='Number of files to train on')
+parser.add_argument('--last-layer', default=32, type=int, metavar='N',
+                    help='dimension of last layer')
 
 args = parser.parse_args()
 
 class Net(nn.Module):
-    def __init__(self):
+    def __init__(self,lastLyr=32):
         super(Net, self).__init__()
         #resnet = models.resnet50(pretrained=True)
         resnet =  resnet50NoBN(pretrained=True)
         self.resNet = nn.Sequential(*(list(resnet.children())[:-1]))
         self.dimRed = nn.Sequential(nn.Linear(2048,1024),nn.ReLU(),nn.Linear(1024,512),nn.ReLU(),nn.Linear(512,256),
-                                    nn.ReLU(),nn.Linear(256,128),nn.ReLU(),nn.Linear(128,32))
-        self.classlyr = nn.Linear(32,2)
+                                    nn.ReLU(),nn.Linear(256,128),nn.ReLU(),nn.Linear(128,lastLyr))
+        self.classlyr = nn.Linear(lastLyr,2)
         
     def forward(self, x):
         x = self.resNet(x)
@@ -128,7 +130,7 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 print(f"Using {device} device")
 
 
-myModel = Net()
+myModel = Net(lastLyr=args.last_layer)
 myModel.to(device)
 
 loss_fn = nn.CrossEntropyLoss()
