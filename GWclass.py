@@ -146,6 +146,6 @@ for t in range(epochs):
     print(f'Train loss: {losses[0,t]:>4f} Val loss: {losses[1,t]:>4f}')
     scheduler.step()
     
-torch.save(model.state_dict(),f'model_{args.save_name}.pt')
+torch.save(myModel.state_dict(),f'model_{args.save_name}.pt')
 np.save(f'loss_{args.save_name}.npy', losses, allow_pickle=True)
 print('Done in {} hours'.format((time.perf_counter()-start_time)/3600))
