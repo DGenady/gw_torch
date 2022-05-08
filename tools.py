@@ -9,7 +9,6 @@ import numpy as np
 import torch
 from scipy.signal import chirp
 import numpy as np
-from skimage.transform import resize
 import boto3
 import matplotlib.pyplot as plt
 
@@ -49,68 +48,6 @@ def getBatchDataClass(data,batchNum,batchsize):
     labels = labels[perm]
     return img, labels.type(torch.LongTensor)
 
-
-def create_chirp():
-    
-    t = np.linspace(0, 1, int(1*16384))
-    param = np.random.randint(10,100,4)
-    a1 = np.random.randint(2,5)
-    a2 = np.random.randint(8,20)
-    f_t = param[0]+param[1]*t+param[2]*np.exp((t)**a1)+param[3]*np.exp((t)**a2)
-    sig = (1+np.exp(t))*np.sin(t*f_t)
-
-    chirps = sig
-    gauss = np.exp(-(t - 1) ** 4 / 0.43** 2)
-    
-    total_length = np.random.randint(2,15)
-    start_ind = np.random.randint(total_length-1)*16384
-    
-    mySignal = 0.3*np.random.rand(total_length*16384) - 0.5
-    mySignal[start_ind:start_ind+16384] = mySignal[start_ind:start_ind+16384] + chirps*gauss
-
-    series = TimeSeries(mySignal,t0=100, dt=1/16384)
-    trans = series.q_transform(whiten=True,frange=(10, 2048), qrange=(4, 64), tres=0.002 )
-
-    plot = trans.plot(figsize=(10, 10),vmin=0, vmax=1e5)
-    ax = plot.gca()
-    ax.grid(False)
-    ax.set_yscale('log')
-    
-    
-    
-    plot.subplots_adjust(bottom = 0)
-    plot.subplots_adjust(top = 1)
-    plot.subplots_adjust(right = 1)
-    plot.subplots_adjust(left = 0)
-    
-    ax.set_axis_off()
-    
-    extent = ax.get_window_extent().transformed(plot.dpi_scale_trans.inverted())
-    extent = ax.get_window_extent().transformed(plot.dpi_scale_trans.inverted())
-
-    plot.canvas.draw()
-    values = np.frombuffer(plot.canvas.tostring_rgb(), dtype=np.uint8)
-    values = values.reshape(plot.canvas.get_width_height()[::-1] + (3,))
-    values = np.flipud(values)
-    values = resize(values,(224,224), mode='reflect')
-    values = values[::-1,:,:]
-    plot.close()
-    
-    return values
-
-
-def add_signal(original):
-    """
-        Provided with data of shape [sample,label,height,width,color] retuns data with additonal 
-        random chrip like signals to all 3 different labes.
-    """
-    samples = original.shape[0]
-    for sample in range(samples):
-        noise = create_chirp()
-        for channel in [0,1,2]:
-            original[sample,channel,:,:,:] = np.maximum(original[sample,channel,:,:,:], noise)
-    plt.close('all')
-    return original
 
 def getBatchData(data,batchNum,batchsize,k):
     imgs = data[batchNum*batchsize:(batchNum+1)*batchsize,k,:,:,:]
