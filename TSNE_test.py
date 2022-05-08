@@ -6,6 +6,7 @@ import argparse
 from tools import *
 import time
 
+parser = argparse.ArgumentParser(description='tsne of data')
 parser.add_argument('--file-name', default='Embed', type=str,
                     help='File to be embedded by t-SNE')
 
