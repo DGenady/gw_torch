@@ -1,5 +1,3 @@
-
-
 """
 common functions used in my scripts
 
@@ -11,7 +9,6 @@ import numpy as np
 import torch
 from scipy.signal import chirp
 import numpy as np
-from gwpy.timeseries import TimeSeries
 from skimage.transform import resize
 import boto3
 import matplotlib.pyplot as plt
