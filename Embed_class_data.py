@@ -16,7 +16,7 @@ import argparse
 parser = argparse.ArgumentParser(description='Embedding Class data')
 parser.add_argument('--batch-size', type=int, default=50, metavar='N',
                     help='input batch size for training (default: 50)')
-parser.add_argument('--model_name', type=str, default='modelname',
+parser.add_argument('--model-name', type=str, default='modelname',
                     help='Select model for embedding')
 parser.add_argument('--data-path', default='triplet_data/file', type=str,
                     help='folder on s3 containing data')
