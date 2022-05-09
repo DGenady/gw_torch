@@ -156,3 +156,20 @@ def resnet50NoBN(pretrained=False, progress=True, **kwargs):
     """
     return _resnet('resnet50', BottleneckNoBN, [3, 4, 6, 3], pretrained, progress,
                    **kwargs)
+
+class Net(nn.Module):
+    def __init__(self,lastLayer=32):
+        super(Net, self).__init__()
+        resnet =  resnet50NoBN(pretrained=True)
+        self.resNet = nn.Sequential(*(list(resnet.children())[:-1]))
+        self.dimRed = nn.Sequential(nn.Linear(2048,1024),nn.ReLU(),nn.Linear(1024,512),nn.ReLU(),nn.Linear(512,256),
+                                    nn.ReLU(),nn.Linear(256,128),nn.ReLU(),nn.Linear(128,lastLayer))
+        self.classlyr = nn.Linear(lastLayer,2)
+        
+    def forward(self, x):
+        x = self.resNet(x)
+        x = torch.squeeze(x)
+        x = F.relu(self.dimRed(x))
+        return self.classlyr(x)
+    
+    
