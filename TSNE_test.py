@@ -9,6 +9,8 @@ import time
 parser = argparse.ArgumentParser(description='tsne of data')
 parser.add_argument('--file-name', default='Embed', type=str,
                     help='File to be embedded by t-SNE')
+parser.add_argument('--perplexity', type=int, default=100, metavar='N',
+                    help='t-sne perplexity parameter')
 
 args = parser.parse_args()
 
@@ -22,7 +24,7 @@ samples = data.shape[1]
 raw_data = np.concatenate((data[0,:,0,:],data[0,:,2,:]))
 signal_data = np.concatenate((data[1,:,0,:],data[1,:,2,:]))
 combined_data = np.concatenate((raw_data,signal_data))
-embedded = TSNE(n_components=2, learning_rate='auto', init='random',perplexity=100).fit_transform(combined_data)
+embedded = TSNE(n_components=2, learning_rate='auto', init='random',perplexity=args.perplexity).fit_transform(combined_data)
 
 group = np.zeros(4*samples)
 group[1*samples:2*samples] = 1
