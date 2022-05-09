@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from torch.utils.model_zoo import load_url as load_state_dict_from_url
 
 
