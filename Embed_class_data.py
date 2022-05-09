@@ -74,21 +74,24 @@ for file in range(0,num_of_files):
     
     
     for batch in range(samples_in_file//(batch_size)):
+      
+        first_ind = 2*file*samples_in_file + 2*batch*batch_size
+        last_ind = 2*file*samples_in_file+2*(batch+1)*batch_size
         
         imgs, labels = getBatchDataClass(data, batch, batch_size)
         imgs = imgs.to(device)
         results = my_model(imgs)
-        all_labels[0, file*samples_in_file+2*batch*batch_size:file*samples_in_file+2*(batch+1)*batch_size] = labels
-        embeddings[0,file*samples_in_file+2*batch*batch_size:file*samples_in_file+2*(batch+1)*batch_size,:] = results.detach().cpu()
-        latent_space[0,file*samples_in_file+2*batch*batch_size:file*samples_in_file+2*(batch+1)*batch_size,:] = activation['dimRed'].detach().cpu()
+        all_labels[0, first_ind:last_ind] = labels
+        embeddings[0, first_ind:last_ind, :] = results.detach().cpu()
+        latent_space[0, first_ind:last_ind, :] = activation['dimRed'].detach().cpu()
         del imgs, labels, results
         
         imgs, labels = getBatchDataClass(moddata, batch, batch_size)
         imgs = imgs.to(device)
         results = my_model(imgs)
-        all_labels[1, file*samples_in_file+2*batch*batch_size:file*samples_in_file+2*(batch+1)*batch_size] = labels
-        embeddings[1,file*samples_in_file+2*batch*batch_size:file*samples_in_file+2*(batch+1)*batch_size,:] = results.detach().cpu()
-        latent_space[1,file*samples_in_file+2*batch*batch_size:file*samples_in_file+2*(batch+1)*batch_size,:] = activation['dimRed'].detach().cpu()
+        all_labels[1, first_ind:last_ind] = labels
+        embeddings[1, first_ind:last_ind, :] = results.detach().cpu()
+        latent_space[1, first_ind:last_ind, :] = activation['dimRed'].detach().cpu()
         del imgs, labels, results
         
 torch.save(latent_space,f'{save_path}_latent.pt')
