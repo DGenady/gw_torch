@@ -16,16 +16,15 @@ import argparse
 parser = argparse.ArgumentParser(description='Embedding Class data')
 parser.add_argument('--batch-size', type=int, default=50, metavar='N',
                     help='input batch size for training (default: 50)')
-parser.add_argument('--model-name', type=str, default='modelname',
-                    help='Select model for embedding')
+parser.add_argument('--model-path', type=str, default='modelpath',
+                    help='Select model for embedding by sepcifing its location')
 parser.add_argument('--data-path', default='triplet_data/file', type=str,
                     help='folder on s3 containing data')
 parser.add_argument('--num-files', default=50, type=int, metavar='N',
                     help='Number of files to embed')
 parser.add_argument('--last-layer', default=32, type=int, metavar='N',
                     help='dimension of last layer')
-parser.add_argument('--save-name', type=str, default='savename',
-                    help='Select save name for saved embeddings and labels')
+
 
 args = parser.parse_args()
 
@@ -38,9 +37,9 @@ def get_activation(name):
     
 s3 = boto3.resource('s3',endpoint_url = 'https://s3-west.nrp-nautilus.io')
 
-model_name = args.model_name
+model_name = args.model_path
 data_path = args.data_path
-save_path = model_name
+save_path = model_name.split('/')[1]
 
 my_model = Net(args.last_layer)
 my_model.load_state_dict(torch.load(load_to_bytes(s3,f's3://tau-astro/gdevit/model/{model_name}.pt')))
