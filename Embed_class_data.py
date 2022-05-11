@@ -24,6 +24,8 @@ parser.add_argument('--num-files', default=50, type=int, metavar='N',
                     help='Number of files to embed')
 parser.add_argument('--last-layer', default=32, type=int, metavar='N',
                     help='dimension of last layer')
+parser.add_argument('--save-name', type=str, default='savename',
+                    help='Select save name for saved embeddings and labels')
 
 args = parser.parse_args()
 
@@ -37,9 +39,11 @@ def get_activation(name):
 s3 = boto3.resource('s3',endpoint_url = 'https://s3-west.nrp-nautilus.io')
 
 model_name = args.model_name
+data_path = args.data_path
+save_path = model_name
 
 my_model = Net(args.last_layer)
-my_model.load_state_dict(torch.load(load_to_bytes(s3,f's3://tau-astro/gdevit/model/model_{model_name}.pt')))
+my_model.load_state_dict(torch.load(load_to_bytes(s3,f's3://tau-astro/gdevit/model/{model_name}.pt')))
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 print(f"Using {device} device")
@@ -47,9 +51,6 @@ print(f"Using {device} device")
 my_model.to(device)
 my_model.eval()
 my_model.dimRed.register_forward_hook(get_activation('dimRed'))
-
-data_path = args.data_path
-save_path = model_name
 
 batch_size = args.batch_size
 samples_in_file = 1000
