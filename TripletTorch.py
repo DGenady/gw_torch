@@ -29,6 +29,8 @@ parser.add_argument('--save-name', default='model-test', type=str,
                     help='the name of the saved files')
 parser.add_argument('--file-totrain', default=50, type=int, metavar='N',
                     help='Number of files to train on')
+parser.add_argument('--lr-decay', type=float, default=0.95, metavar='LRDECAY',
+                    help='learning rate exponentail decay coefficient (default:0.97)')
 
 args = parser.parse_args()
 
@@ -130,7 +132,7 @@ tnet = Tripletnet(model).to(device)
 
 loss_fn = nn.TripletMarginLoss(margin=args.margin, p=2)
 optimizer = torch.optim.Adam(tnet.parameters(), lr=args.lr)
-scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.97)
+scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=args.lr_decay)
 
 epochs = args.epochs
 losses = np.empty((2,epochs))
