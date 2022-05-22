@@ -14,10 +14,10 @@ args = parser.parse_args()
 
 s3 = boto3.resource('s3',endpoint_url = 'https://s3-west.nrp-nautilus.io')
 
-with open('O1_H1.txt','r') as f:
+with open('/download/O1_H1.txt','r') as f:
     H1_list = f.read().split('\n')
     
-with open('O1_L1.txt','r') as f:
+with open('/download/O1_L1.txt','r') as f:
     L1_list = f.read().split('\n')
     
 for i in range(args.start_file,args.last_file):
