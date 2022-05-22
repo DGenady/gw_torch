@@ -2,7 +2,7 @@ import os.path
 import time
 import urllib
 import boto3
-import argsparse
+import argparse
 
 
 parser = argparse.ArgumentParser(description='PyTorch Triplet network')
