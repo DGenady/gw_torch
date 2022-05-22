@@ -173,4 +173,18 @@ class Net(nn.Module):
         x = F.relu(self.dimRed(x))
         return self.classlyr(x)
     
+
+class Net_trip(nn.Module):
+    def __init__(self):
+        super(Net, self).__init__()
+        #resnet = models.resnet50(pretrained=True)
+        resnet =  resnet50NoBN(pretrained=True)
+        self.resNet = nn.Sequential(*(list(resnet.children())[:-1]))
+        self.dimRed = nn.Sequential(nn.Linear(2048,1024),nn.ReLU(),nn.Linear(1024,512),nn.ReLU(),nn.Linear(512,256),
+                                    nn.ReLU(),nn.Linear(256,128),nn.ReLU(),nn.Linear(128,32))
+    def forward(self, x):
+        x = self.resNet(x)
+        x = torch.squeeze(x)
+        return self.dimRed(x)
+    
     
