@@ -55,9 +55,11 @@ batch_size = args.batch_size
 samples_in_file = 1000
 num_of_files = args.num_files
 
-embeddings = torch.empty((2,2*num_of_files*samples_in_file ,2))
-latent_space =  torch.empty((2,2*num_of_files*samples_in_file ,args.last_layer))
-all_labels = torch.empty((2,2*num_of_files*samples_in_file))
+# first index seprates between no signal and injected signal,
+# second index seperates betwenn H and L, where 0 is H and 1 is L.
+embeddings = torch.empty((2,2,num_of_files*samples_in_file ,2))
+latent_space =  torch.empty((2,2,num_of_files*samples_in_file ,args.last_layer))
+all_labels = torch.empty((2,2,num_of_files*samples_in_file))
 
 noise = np.load(load_to_bytes(s3,'s3://tau-astro/gdevit/model/embedded/signals.npy'), allow_pickle=True)
 
@@ -75,24 +77,26 @@ for file in range(0,num_of_files):
     
     for batch in range(samples_in_file//(batch_size)):
       
-        first_ind = 2*file*samples_in_file + 2*batch*batch_size
-        last_ind = 2*file*samples_in_file+2*(batch+1)*batch_size
+        first_ind = file*samples_in_file + batch*batch_size
+        last_ind = file*samples_in_file + (batch+1)*batch_size
         
-        imgs, labels = getBatchDataClass(data, batch, batch_size)
-        imgs = imgs.to(device)
-        results = my_model(imgs)
-        all_labels[0, first_ind:last_ind] = labels
-        embeddings[0, first_ind:last_ind, :] = results.detach().cpu()
-        latent_space[0, first_ind:last_ind, :] = activation['dimRed'].detach().cpu()
-        del imgs, labels, results
-        
-        imgs, labels = getBatchDataClass(moddata, batch, batch_size)
-        imgs = imgs.to(device)
-        results = my_model(imgs)
-        all_labels[1, first_ind:last_ind] = labels
-        embeddings[1, first_ind:last_ind, :] = results.detach().cpu()
-        latent_space[1, first_ind:last_ind, :] = activation['dimRed'].detach().cpu()
-        del imgs, labels, results
+        for j,detector in enumerate(['H','L']):
+            
+            imgs, labels = EmbClassBatch(data, batch, batch_size,detector)
+            imgs = imgs.to(device)
+            results = my_model(imgs)
+            all_labels[0,j, first_ind:last_ind] = labels
+            embeddings[0,j, first_ind:last_ind, :] = results.detach().cpu()
+            latent_space[0,j, first_ind:last_ind, :] = activation['dimRed'].detach().cpu()
+            del imgs, labels, results
+
+            imgs, labels = EmbClassBatch(moddata, batch, batch_size,detector)
+            imgs = imgs.to(device)
+            results = my_model(imgs)
+            all_labels[1,j, first_ind:last_ind] = labels
+            embeddings[1,j, first_ind:last_ind, :] = results.detach().cpu()
+            latent_space[1,j, first_ind:last_ind, :] = activation['dimRed'].detach().cpu()
+            del imgs, labels, results
         
 torch.save(latent_space,f'{save_path}_latent.pt')
 torch.save(embeddings,f'{save_path}_class.pt')
