@@ -48,6 +48,17 @@ def getBatchDataClass(data,batchNum,batchsize):
     labels = labels[perm]
     return img, labels.type(torch.LongTensor)
 
+def EmbClassBatch(data,batchNum,batchsize,k):
+    """ returns a batch of the data to be trained """
+    if k == 'H':
+        img  = data[batchNum*batchsize:(batchNum+1)*batchsize,0,:,:,:]
+        labels = torch.zeros(batchsize)
+    elif k == 'L':
+        img  = data[batchNum*batchsize:(batchNum+1)*batchsize,2,:,:,:]
+        labels = torch.zeros(batchsize) + 1
+    return img, labels.type(torch.LongTensor)
+
+
 
 def getBatchData(data,batchNum,batchsize,k):
     imgs = data[batchNum*batchsize:(batchNum+1)*batchsize,k,:,:,:]
