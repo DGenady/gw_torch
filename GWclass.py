@@ -51,7 +51,7 @@ def train(numOfFiles, numOfSamples, batchsize, model, loss_fn, optimizer, filePa
             #Compute prediction error
             result = model(img)
             loss = loss_fn(result, labels)  
-            std_loss = batch_std(result,labels,0) + batch_std(result,labels,1) 
+            std_loss = batch_std(result,labels,0).cpu() + batch_std(result,labels,1).cpu() 
             
             # Backpropagation
             loss.backward()
@@ -60,7 +60,7 @@ def train(numOfFiles, numOfSamples, batchsize, model, loss_fn, optimizer, filePa
             
             std_losses.append(std_loss)
     
-    return np.mean(np.asarray(losses)),np.mean(np.asarray(std_losses.cpu()))
+    return np.mean(np.asarray(losses)),np.mean(np.asarray(std_losses))
 
 
 def test(firstFile,lastFile, numOfSamples, batchsize, model, loss_fn, filePath):
