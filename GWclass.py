@@ -138,7 +138,7 @@ for t in range(epochs):
     #                    filePath=args.data_path)
     #losses[1,t] = test(firstFile=args.file_totrain,lastFile=args.file_totrain+10, numOfSamples=1000, batchsize=args.batch_size, model=myModel,
     #                   loss_fn=loss_fn, filePath=args.data_path)
-    print(f'Train loss: {losses[0,t]:>4f} Val loss: {losses[1,t]:>4f}')
+    #print(f'Train loss: {losses[0,t]:>4f} Val loss: {losses[1,t]:>4f}')
     scheduler.step()
     
 torch.save(myModel.state_dict(),f'model_{args.save_name}.pt')
