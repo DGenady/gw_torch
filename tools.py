@@ -92,3 +92,7 @@ def add_signal_class(original,noise):
             index = indicies[sample]
             original[sample,channel,:,:,:] = np.maximum(original[sample,channel,:,:,:],noise[index,:,:,:])
     return original
+
+def batch_std(samples,label,detector):
+    indices = torch.where(label == detector)[0]
+    return torch.mean(torch.std(samples[indices],axis=0))
