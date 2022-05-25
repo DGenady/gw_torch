@@ -7,7 +7,7 @@ from io import BytesIO
 import numpy as np
 from torchvision import models
 import time
-from resnetNoBN import resnet50NoBN
+from resnetNoBN import resnet50NoBN, Net 
 import argparse
 
 
@@ -34,26 +34,12 @@ parser.add_argument('--lr-decay', type=float, default=0.97, metavar='LRDECAY',
 
 args = parser.parse_args()
 
-class Net(nn.Module):
-    def __init__(self,lastLyr=32):
-        super(Net, self).__init__()
-        #resnet = models.resnet50(pretrained=True)
-        resnet =  resnet50NoBN(pretrained=True)
-        self.resNet = nn.Sequential(*(list(resnet.children())[:-1]))
-        self.dimRed = nn.Sequential(nn.Linear(2048,1024),nn.ReLU(),nn.Linear(1024,512),nn.ReLU(),nn.Linear(512,256),
-                                    nn.ReLU(),nn.Linear(256,128),nn.ReLU(),nn.Linear(128,lastLyr))
-        self.classlyr = nn.Linear(lastLyr,2)
-        
-    def forward(self, x):
-        x = self.resNet(x)
-        x = torch.squeeze(x)
-        x = F.relu(self.dimRed(x))
-        return self.classlyr(x)
 
 
 def train(numOfFiles, numOfSamples, batchsize, model, loss_fn, optimizer, filePath):
     size = numOfFiles*numOfSamples//batchsize
     losses = []
+    std_losses = []
     model.train()
     for file in range(numOfFiles):
         data = loadFile(path=filePath, num=file, s3obj=s3)
@@ -64,14 +50,15 @@ def train(numOfFiles, numOfSamples, batchsize, model, loss_fn, optimizer, filePa
             
             #Compute prediction error
             result = model(img)
-            loss = loss_fn(result, labels) 
-            
+            loss = loss_fn(result, labels)  
+            std_loss = 0.01*batch(resutl,labels,0) + 0.01*batch(resutl,labels,1) 
             # Backpropagation
             loss.backward()
             optimizer.step()
             losses.append(loss.item())
+            std_losses.append( batch(resutl,labels,0) + batch(resutl,labels,1) )
     
-    return np.mean(np.asarray(losses))
+    return np.mean(np.asarray(losses)),np.mean(np.asarray(std_losses))
 
 
 def test(firstFile,lastFile, numOfSamples, batchsize, model, loss_fn, filePath):
@@ -140,13 +127,17 @@ optimizer = torch.optim.Adam(myModel.parameters(), lr=args.lr)
 scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=args.lr_decay)
 
 epochs = args.epochs
-losses = np.empty((2,epochs))
+#losses = np.empty((2,epochs))
+losses = np.empty((epochs,2))
 for t in range(epochs):
     print(f"Epoch {t+1}\n-------------------------------")
-    losses[0,t] = train(numOfFiles=args.file_totrain, numOfSamples=1000, batchsize=args.batch_size, model=myModel, loss_fn=loss_fn, optimizer=optimizer, 
+    losses[t,:] = train(numOfFiles=args.file_totrain, numOfSamples=1000, batchsize=args.batch_size, model=myModel, loss_fn=loss_fn, optimizer=optimizer, 
                         filePath=args.data_path)
-    losses[1,t] = test(firstFile=args.file_totrain,lastFile=args.file_totrain+10, numOfSamples=1000, batchsize=args.batch_size, model=myModel,
-                       loss_fn=loss_fn, filePath=args.data_path)
+    
+    #losses[0,t] = train(numOfFiles=args.file_totrain, numOfSamples=1000, batchsize=args.batch_size, model=myModel, loss_fn=loss_fn, optimizer=optimizer, 
+    #                    filePath=args.data_path)
+    #losses[1,t] = test(firstFile=args.file_totrain,lastFile=args.file_totrain+10, numOfSamples=1000, batchsize=args.batch_size, model=myModel,
+    #                   loss_fn=loss_fn, filePath=args.data_path)
     print(f'Train loss: {losses[0,t]:>4f} Val loss: {losses[1,t]:>4f}')
     scheduler.step()
     
