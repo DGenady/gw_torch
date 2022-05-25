@@ -119,7 +119,7 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 print(f"Using {device} device")
 
 
-myModel = Net(lastLyr=args.last_layer)
+myModel = Net(lastLayer=args.last_layer)
 myModel.to(device)
 
 loss_fn = nn.CrossEntropyLoss()
