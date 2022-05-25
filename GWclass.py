@@ -51,7 +51,7 @@ def train(numOfFiles, numOfSamples, batchsize, model, loss_fn, optimizer, filePa
             #Compute prediction error
             result = model(img)
             loss = loss_fn(result, labels)  
-            std_loss = batch_std(result,labels,0).detach().numpy() + batch_std(result,labels,1).detach().numpy() 
+            std_loss = batch_std(result,labels,0).detach().cpu().numpy() + batch_std(result,labels,1).detach().cpu().numpy() 
             
             # Backpropagation
             loss.backward()
