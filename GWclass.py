@@ -112,6 +112,10 @@ def getBatchData(data,batchNum,batchsize):
     img = img[perm,:,:,:]
     labels = labels[perm]
     return img, labels.type(torch.LongTensor)
+  
+def batch_std(samples,label,detector):
+    indices = torch.where(label == detector)[0]
+    return torch.mean(torch.std(samples[indices],axis=0))
         
 start_time = time.perf_counter()
 
