@@ -60,7 +60,7 @@ def train(numOfFiles, numOfSamples, batchsize, model, loss_fn, optimizer, filePa
             
             std_losses.append(std_loss)
     
-    return np.mean(np.asarray(losses)),np.mean(np.asarray(std_losses))
+    return np.mean(np.asarray(losses)),np.mean(np.asarray(std_losses.cpu()))
 
 
 def test(firstFile,lastFile, numOfSamples, batchsize, model, loss_fn, filePath):
