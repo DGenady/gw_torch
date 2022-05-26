@@ -137,7 +137,7 @@ for t in range(epochs):
     print(f"Epoch {t+1}\n-------------------------------")
     losses[0,t] = train(numOfFiles=args.file_totrain, numOfSamples=1000, batchsize=args.batch_size, model=myModel, loss_fn=loss_fn, optimizer=optimizer, 
                         filePath=args.data_path)
-    losses[1,t] = test(firstFile=args.file_totrain,lastFile=args.file_totrain+10, numOfSamples=1000, batchsize=args.batch_size, model=myModel,
+    losses[1,t] = test(firstFile=args.file_totrain,lastFile=args.file_totrain, numOfSamples=1000, batchsize=args.batch_size, model=myModel,
                        loss_fn=loss_fn, filePath=args.data_path)
     #print(f'Train loss: {losses[0,t]:>4f} Val loss: {losses[1,t]:>4f}')
     scheduler.step()
