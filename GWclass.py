@@ -131,7 +131,7 @@ optimizer = torch.optim.Adam(myModel.parameters(), lr=args.lr)
 scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=args.lr_decay)
 
 epochs = args.epochs
-#losses = np.empty((2,epochs))
+losses = np.empty((2,epochs))
 
 for t in range(epochs):
     print(f"Epoch {t+1}\n-------------------------------")
