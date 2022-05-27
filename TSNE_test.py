@@ -21,7 +21,7 @@ start_time = time.perf_counter()
 
 s3 = boto3.resource('s3',endpoint_url = 'https://s3-west.nrp-nautilus.io')
 file_path = args.file_path
-file_nampe = file_path.split('/')[-1]
+file_name = file_path.split('/')[-1]
 
 data = torch.load(load_to_bytes(s3,f's3://tau-astro/gdevit/model/{file_path}.pt')).numpy()
 samples = args.num_of_samples
