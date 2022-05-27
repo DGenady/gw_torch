@@ -31,6 +31,8 @@ parser.add_argument('--last-layer', default=32, type=int, metavar='N',
                     help='dimension of last layer')
 parser.add_argument('--lr-decay', type=float, default=0.97, metavar='LRDECAY',
                     help='learning rate exponentail decay coefficient (default:0.97)')
+parser.add_argument('--std-coefficent', type=float, default=0.01, metavar='CLCOE',
+                    help='STD coeffcient in the loss calculation (default:0.01)')
 
 args = parser.parse_args()
 
@@ -49,7 +51,7 @@ def train(numOfFiles, numOfSamples, batchsize, model, loss_fn, optimizer, filePa
             
             #Compute prediction error
             results = model(img)
-            loss = loss_fn(results, labels) + 0.1*batch_std(results,labels,0) + 0.1*batch_std(results,labels,1)
+            loss = loss_fn(results, labels) + args.std_coefficen*batch_std(results,labels,0) + args.std_coefficen*batch_std(results,labels,1)
             
             # Backpropagation
             loss.backward()
@@ -73,7 +75,7 @@ def test(firstFile,lastFile, numOfSamples, batchsize, model, loss_fn, filePath):
 
                 #Compute prediction error
                 results = model(img)
-                loss = loss_fn(results, labels) + 0.1*batch_std(results,labels,0) + 0.1*batch_std(results,labels,1)
+                loss = loss_fn(results, labels) + args.std_coefficent*batch_std(results,labels,0) + args.std_coefficen*batch_std(results,labels,1)
                 losses.append(loss.item())
            
     return np.mean(np.asarray(losses))
