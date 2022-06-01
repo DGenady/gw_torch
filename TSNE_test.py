@@ -37,7 +37,7 @@ signal_data = np.concatenate((data[1,0,:samples,:],data[1,1,:samples,:]))
 combined_data = np.concatenate((raw_data,signal_data))
 embedded = TSNE(n_components=2, learning_rate='auto', init='random',perplexity=args.perplexity).fit_transform(combined_data)
 
-group = np.concateate((labels[0,0,:samples],labels[0,1,:samples],labels[1,0,:samples],labels[1,1,:samples]))
+group = np.concatenate((labels[0,0,:samples],labels[0,1,:samples],labels[1,0,:samples],labels[1,1,:samples]))
                                 
 np.save(f'{file_name}_embedded.npy', embedded, allow_pickle=True)
 np.save(f'{file_name}_group.npy', group, allow_pickle=True)
