@@ -63,7 +63,7 @@ def train(numOfFiles, numOfSamples, batchsize, model, loss_fn, optimizer, filePa
             
             #Compute prediction error
             emb1,emb2,emb3 = model(img1,img2,img3)
-            loss = loss_fn(emb1,emb2,emb3) + 0.001*(emb1.norm(2)+emb2.norm(2)+emb3.norm(2))+alpha*(batch_std(emd1)+batch_std(emd2)+batch_std(emd3))
+            loss = loss_fn(emb1,emb2,emb3) + 0.001*(emb1.norm(2)+emb2.norm(2)+emb3.norm(2))+alpha*(batch_std(emb1)+batch_std(emb2)+batch_std(emb3))
             
             # Backpropagation
             loss.backward()
@@ -84,7 +84,7 @@ def test(firstFile,lastFile, numOfSamples, batchsize, model, loss_fn, filePath,a
 
                 #Compute prediction error
                 emb1,emb2,emb3 = model(img1,img2,img3)
-                loss = loss_fn(emb1,emb2,emb3) + 0.001*(emb1.norm(2)+emb2.norm(2)+emb3.norm(2))+alpha*(batch_std(emd1)+batch_std(emd2)+batch_std(emd3))
+                loss = loss_fn(emb1,emb2,emb3) + 0.001*(emb1.norm(2)+emb2.norm(2)+emb3.norm(2))+alpha*(batch_std(emb1)+batch_std(emb2)+batch_std(emb3))
                 losses.append(loss.item())
            
     return np.mean(np.asarray(losses))
