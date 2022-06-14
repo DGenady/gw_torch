@@ -7,7 +7,7 @@ from io import BytesIO
 import numpy as np
 from torchvision import models
 import time
-from resnetNoBN import resnet50NoBN
+from resnetNoBN import resnet50NoBN, Net, Net_trip, Net_trip_2
 import argparse
 
 
@@ -31,6 +31,10 @@ parser.add_argument('--file-totrain', default=50, type=int, metavar='N',
                     help='Number of files to train on')
 parser.add_argument('--lr-decay', type=float, default=0.95, metavar='LRDECAY',
                     help='learning rate exponentail decay coefficient (default:0.97)')
+parser.add_argument('--model-type', default='Net', type=str,
+                    help='architecture of the embedding network')
+parser.add_argument('--alpha', type=float, default=0.1, metavar='LR',
+                    help='clustering coefficient (default: 0.1)')
 
 args = parser.parse_args()
 
@@ -45,20 +49,8 @@ class Tripletnet(nn.Module):
         embedded_z = self.embeddingnet(z)
         return embedded_x, embedded_y, embedded_z
 
-class Net(nn.Module):
-    def __init__(self):
-        super(Net, self).__init__()
-        #resnet = models.resnet50(pretrained=True)
-        resnet =  resnet50NoBN(pretrained=True)
-        self.resNet = nn.Sequential(*(list(resnet.children())[:-1]))
-        self.dimRed = nn.Sequential(nn.Linear(2048,1024),nn.ReLU(),nn.Linear(1024,512),nn.ReLU(),nn.Linear(512,256),
-                                    nn.ReLU(),nn.Linear(256,128),nn.ReLU(),nn.Linear(128,32))
-    def forward(self, x):
-        x = self.resNet(x)
-        x = torch.squeeze(x)
-        return self.dimRed(x)
 
-def train(numOfFiles, numOfSamples, batchsize, model, loss_fn, optimizer, filePath):
+def train(numOfFiles, numOfSamples, batchsize, model, loss_fn, optimizer, filePath, alpha):
     size = numOfFiles*numOfSamples//batchsize
     losses = []
     model.train()
@@ -71,7 +63,7 @@ def train(numOfFiles, numOfSamples, batchsize, model, loss_fn, optimizer, filePa
             
             #Compute prediction error
             emb1,emb2,emb3 = model(img1,img2,img3)
-            loss = loss_fn(emb1,emb2,emb3) + 0.001*(emb1.norm(2)+emb2.norm(2)+emb3.norm(2))
+            loss = loss_fn(emb1,emb2,emb3) + 0.001*(emb1.norm(2)+emb2.norm(2)+emb3.norm(2))+alpha*(batch_std(emd1)+batch_std(emd2)+batch_std(emd3))
             
             # Backpropagation
             loss.backward()
@@ -79,7 +71,7 @@ def train(numOfFiles, numOfSamples, batchsize, model, loss_fn, optimizer, filePa
             losses.append(loss.item())
     return np.mean(np.asarray(losses))
 
-def test(firstFile,lastFile, numOfSamples, batchsize, model, loss_fn, filePath):
+def test(firstFile,lastFile, numOfSamples, batchsize, model, loss_fn, filePath,alpha):
     losses = []
     model.eval()
     
@@ -92,7 +84,7 @@ def test(firstFile,lastFile, numOfSamples, batchsize, model, loss_fn, filePath):
 
                 #Compute prediction error
                 emb1,emb2,emb3 = model(img1,img2,img3)
-                loss = loss_fn(emb1,emb2,emb3) + 0.001*(emb1.norm(2)+emb2.norm(2)+emb3.norm(2))
+                loss = loss_fn(emb1,emb2,emb3) + 0.001*(emb1.norm(2)+emb2.norm(2)+emb3.norm(2))+alpha*(batch_std(emd1)+batch_std(emd2)+batch_std(emd3))
                 losses.append(loss.item())
            
     return np.mean(np.asarray(losses))
@@ -119,6 +111,10 @@ def getBatchData(data,batchNum,batchsize):
     imgs2 = data[batchNum*batchsize:(batchNum+1)*batchsize,1,:,:,:]
     imgs3 = data[batchNum*batchsize:(batchNum+1)*batchsize,2,:,:,:]
     return imgs1, imgs2 , imgs3
+  
+def batch_std(samples):
+    return torch.mean(torch.std(samples,axis=0))
+        
         
 start_time = time.perf_counter()
 
@@ -127,7 +123,15 @@ s3 = boto3.resource('s3',endpoint_url = 'https://s3-west.nrp-nautilus.io')
 device = "cuda" if torch.cuda.is_available() else "cpu"
 print(f"Using {device} device")
 
-model = Net()
+network_type = args.model_type
+
+if network_type == 'Net':
+    model = Net()
+elif network_type == 'Net_trip':
+    model = Net_trip()
+elif network_type == 'Net_trip_2':
+    model = Net_trip_2()
+    
 tnet = Tripletnet(model).to(device)
 
 loss_fn = nn.TripletMarginLoss(margin=args.margin, p=2)
@@ -139,9 +143,9 @@ losses = np.empty((2,epochs))
 for t in range(epochs):
     print(f"Epoch {t+1}\n-------------------------------")
     losses[0,t] = train(numOfFiles=args.file_totrain, numOfSamples=1000, batchsize=args.batch_size, model=tnet, loss_fn=loss_fn, optimizer=optimizer, 
-                        filePath=args.data_path)
+                        filePath=args.data_path, alpha = args.alpha)
     losses[1,t] = test(firstFile=args.file_totrain,lastFile=args.file_totrain+10, numOfSamples=1000, batchsize=args.batch_size, model=tnet,
-                       loss_fn=loss_fn, filePath=args.data_path)
+                       loss_fn=loss_fn, filePath=args.data_path, alpha = args.alpha)
     print(f'Train loss: {losses[0,t]:>4f} Val loss: {losses[1,t]:>4f}')
     scheduler.step()
     
