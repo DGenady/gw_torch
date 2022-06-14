@@ -187,4 +187,17 @@ class Net_trip(nn.Module):
         x = torch.squeeze(x)
         return self.dimRed(x)
     
+# added on the 220614
+class Net_trip_2(nn.Module):
+    def __init__(self):
+        super(Net, self).__init__()
+        #resnet = models.resnet50(pretrained=True)
+        resnet =  resnet50NoBN(pretrained=True)
+        self.resNet = nn.Sequential(*(list(resnet.children())[:-1]))
+        self.dimRed = nn.Sequential(nn.Linear(2048,512),nn.ReLU(),nn.Linear(512,128),
+                                    nn.ReLU(),nn.Linear(128,32),nn.ReLU(),nn.Linear(32,10))
+    def forward(self, x):
+        x = self.resNet(x)
+        x = torch.squeeze(x)
+        return self.dimRed(x)
     
