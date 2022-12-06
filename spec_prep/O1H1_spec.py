@@ -12,7 +12,7 @@ def get_unprocceced_segments(segments,procceced_segments):
     left_to_procces = []
     for i in range(len(segments)):
         done = 0
-        for j in range(len(procceced_segments)):
+        for j in range(len(procceced_segments)-1):
             if segment_list[i][0] == procceced[j][0] and segment_list[i][1] == procceced[j][1]:
                 done += 1
         if done == 0:
