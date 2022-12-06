@@ -8,6 +8,24 @@ import os
 import multiprocessing as mp
 import random
 
+def get_unprocceced_segments(segments,procceced_segments):
+    left_to_procces = []
+    for i in range(len(segments)):
+        done = 0
+        for j in range(len(procceced_segments)):
+            if segment_list[i][0] == procceced[j][0] and segment_list[i][1] == procceced[j][1]:
+                done += 1
+        if done == 0:
+            left_to_procces.append(i)
+    print(f'segments left to be procceced {len(left_to_procces)}. difference {len(segments)-len(procceced)}')
+    
+    left_segments=[]
+    for i in range(len(segments)):
+        if i in left_to_procces:
+            left_segments.append(segments[i])
+    
+    return left_segments
+
 def get_segments(path):
     with open(path,'r') as f:
         segment_list = f.read().split('\n')
@@ -176,17 +194,26 @@ print(f'Creating spectrograms for {detector} detector')
 
 s3 = boto3.client('s3',endpoint_url='https://s3-west.nrp-nautilus.io')
 
+s3.download_file('tau-astrp', f'gdevit/gw_data/O1/{detector}1/saved_segments.txt','saved_segments.txt')
+procceced = get_segments(f'saved_segments.txt')
+
 segment_list = get_segments('./gw_torch/spec_prep/O1_BOTH.txt')
+segment_list = get_unprocceced_segments(segment_list, procceced)
+
 files_for_segment = segments_files(detector,segment_list)
-
-
 indices = list(zip(segment_list, files_for_segment))
 random.shuffle(indices)
 
 segment_list, files_for_segment = zip(*indices)
 
-pool = mp.Pool(mp.cpu_count() - 1)
-print(f'using {mp.cpu_count()-1} cpus')
+numCPUs = mp.cpu_count() - 1
+
+if numCPUs > 16:
+    pool = mp.Pool(16)
+    print(f'using 16 cpus')
+else:    
+    pool = mp.Pool(mp.cpu_count() - 1)
+    print(f'using {mp.cpu_count()-1} cpus')
 
 pool.starmap(make_save_spec, [(segment,files_for_segment[i], detector) for i, segment in enumerate(segment_list)])
 print('done')
