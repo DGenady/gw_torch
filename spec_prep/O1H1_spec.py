@@ -12,7 +12,7 @@ def get_unprocceced_segments(segments,procceced_segments):
     left_to_procces = []
     for i in range(len(segments)):
         done = 0
-        for j in range(len(procceced_segments)-1):
+        for j in range(len(procceced_segments)):
             if segment_list[i][0] == procceced[j][0] and segment_list[i][1] == procceced[j][1]:
                 done += 1
         if done == 0:
@@ -31,6 +31,8 @@ def get_segments(path):
         segment_list = f.read().split('\n')
     done_list = []
     for segment in segment_list:
+        if segment == '':
+            continue
         t_i = int(segment.split(' ')[0])
         t_f = int(segment.split(' ')[1])
         done_list.append((t_i,t_f))
