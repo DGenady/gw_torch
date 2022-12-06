@@ -188,5 +188,5 @@ segment_list, files_for_segment = zip(*indices)
 pool = mp.Pool(mp.cpu_count() - 1)
 print(f'using {mp.cpu_count()-1} cpus')
 
-pool.starmap(make_save_spec, [(segment,files_for_segment[i], detector) for i, segment in enumerate(segment_list[0:5])])
+pool.starmap(make_save_spec, [(segment,files_for_segment[i], detector) for i, segment in enumerate(segment_list)])
 print('done')
