@@ -194,7 +194,7 @@ print(f'Creating spectrograms for {detector} detector')
 
 s3 = boto3.client('s3',endpoint_url='https://s3-west.nrp-nautilus.io')
 
-s3.download_file('tau-astrp', f'gdevit/gw_data/O1/{detector}1/saved_segments.txt','saved_segments.txt')
+s3.download_file('tau-astro', f'gdevit/gw_data/O1/{detector}1/saved_segments.txt','saved_segments.txt')
 procceced = get_segments(f'saved_segments.txt')
 
 segment_list = get_segments('./gw_torch/spec_prep/O1_BOTH.txt')
