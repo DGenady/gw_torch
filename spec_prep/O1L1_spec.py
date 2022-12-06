@@ -31,6 +31,8 @@ def get_segments(path):
         segment_list = f.read().split('\n')
     done_list = []
     for segment in segment_list:
+        if segment == '':
+            continue
         t_i = int(segment.split(' ')[0])
         t_f = int(segment.split(' ')[1])
         done_list.append((t_i,t_f))
