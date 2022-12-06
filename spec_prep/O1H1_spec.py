@@ -143,8 +143,12 @@ def make_save_spec(segment,files,detector):
         if spectrograms.shape[0] >= 1000:
             file_name = f'{detector}_segment_{segment[0]}_{segment[1]}_{save_ind}.npy'
             time_name = f'{detector}_segment_times_{segment[0]}_{segment[1]}_{save_ind}.npy'
-            np.save(spec_save+file_name,spectrograms[:1000],allow_pickle=True)
-            np.save(time_save+time_name,times[:1000],allow_pickle=True)
+            np.save(file_name,spectrograms[:1000],allow_pickle=True)
+            np.save(time_name,times[:1000],allow_pickle=True)
+            s3.upload_file(file_name, 'tau-astro', f'gdevit/gw_data/O1/{detector}1/spectrograms/{file_name}')
+            s3.upload_file(time_name, 'tau-astro', f'gdevit/gw_data/O1/{detector}1/times/{time_name}')
+            os.remove(file_name)
+            os.remove(time_name)
             spectrograms = spectrograms[1000:]
             times = times[1000:]
             save_ind += 1
