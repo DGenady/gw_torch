@@ -20,7 +20,7 @@ def get_segments(path):
 
 def segments_files(detector, segment_list=None):
     
-    with open(f'O1_{detector}1.txt','r') as f:
+    with open(f'./gw_torch/spec_prep/O1_{detector}1.txt','r') as f:
         my_list = f.read().split('\n')
 
     s3_list = []
@@ -172,7 +172,7 @@ print(f'Creating spectrograms for {detector} detector')
 
 s3 = boto3.client('s3',endpoint_url='https://s3-west.nrp-nautilus.io')
 
-segment_list = get_segments('O1_BOTH.txt')
+segment_list = get_segments('./gw_torch/spec_prep/O1_BOTH.txt')
 files_for_segment = segments_files(detector,segment_list)
 
 
