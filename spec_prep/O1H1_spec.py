@@ -149,7 +149,7 @@ def make_save_spec(segment,files,detector):
             times = times[1000:]
             save_ind += 1
             
-    delete_segment(files,detector, down_path)
+    delete_segment(files,detector)
     
     file_name = f'{detector}_segment_{segment[0]}_{segment[1]}_{save_ind}.npy'
     time_name = f'{detector}_segment_times_{segment[0]}_{segment[1]}_{save_ind}.npy'
