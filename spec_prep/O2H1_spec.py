@@ -194,6 +194,10 @@ procceced = None
 try:
     s3.download_file('tau-astro', f'gdevit/gw_data/O2/{detector}1/saved_segments.txt','saved_segments.txt')
     procceced = get_segments(f'saved_segments.txt')
+except:
+    print('no saved segements')
+    
+    
 
 segment_list = get_segments('./gw_torch/spec_prep/O2_BOTH.txt')
 
