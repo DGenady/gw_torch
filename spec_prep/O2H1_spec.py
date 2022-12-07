@@ -39,7 +39,7 @@ def get_segments(path):
 
 def segments_files(detector, segment_list=None):
     
-    with open(f'O2_{detector}1.txt','r') as f:
+    with open(f'./gw_torch/spec_prep/O2_{detector}1.txt','r') as f:
         my_list = f.read().split('\n')
 
     detector_segment_files = []
