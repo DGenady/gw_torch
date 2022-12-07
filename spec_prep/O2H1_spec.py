@@ -123,11 +123,10 @@ def make_spectrogram(data, Tc=64, To=2):
         
     return qts, times
 
-def get_TS_data(segment_files,t_i ,t_f):
+def get_TS_data(segment_files,t_i ,t_f ):
     files = []
     for file in segment_files:
-        detector = file[0:1]
-        files.append(f'{detector}-{detector}1_LOSC_16_V1-{file[3:-5]}-4096.hdf5')
+        files.append(file)
 
     data = TimeSeries.read(files, start=t_i, end=t_f, format='hdf5.gwosc',verbose=False)
     return data
@@ -167,7 +166,7 @@ def make_save_spec(segment,files,detector):
             times = times[1000:]
             save_ind += 1
             
-    delete_segment(files,detector)
+    delete_segment(files)
     
     file_name = f'{detector}_segment_{segment[0]}_{segment[1]}_{save_ind}.npy'
     time_name = f'{detector}_segment_times_{segment[0]}_{segment[1]}_{save_ind}.npy'
