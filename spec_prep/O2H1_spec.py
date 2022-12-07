@@ -70,7 +70,7 @@ def download_segment(segment,detector):
         s3_path = f"gdevit/gw_data/strain/O2/{detector}1/{file}"
         s3.download_file('tau-astro', s3_path, file)
         
-def delete_segment(segment,detector):
+def delete_segment(segment):
     for file in segment:
         os.remove(file)
         
@@ -138,7 +138,7 @@ def make_save_spec(segment,files,detector):
 
     start_time = time.time()
     
-    download_segment(files)
+    download_segment(files, detector)
     
     first = True
     
