@@ -39,7 +39,7 @@ def get_segments(path):
 
 def segments_files(detector, segment_list=None):
     
-    with open(f'O2_{detector}1.txt','r') as f:
+    with open(f'./gw_torch/spec_prep/O2_{detector}1.txt','r') as f:
         my_list = f.read().split('\n')
 
     detector_segment_files = []
@@ -70,7 +70,7 @@ def download_segment(segment,detector):
         s3_path = f"gdevit/gw_data/strain/O2/{detector}1/{file}"
         s3.download_file('tau-astro', s3_path, file)
         
-def delete_segment(segment,detector):
+def delete_segment(segment):
     for file in segment:
         os.remove(file)
         
@@ -123,11 +123,10 @@ def make_spectrogram(data, Tc=64, To=2):
         
     return qts, times
 
-def get_TS_data(segment_files,t_i ,t_f):
+def get_TS_data(segment_files,t_i ,t_f ):
     files = []
     for file in segment_files:
-        detector = file[0:1]
-        files.append(f'{detector}-{detector}1_LOSC_16_V1-{file[3:-5]}-4096.hdf5')
+        files.append(file)
 
     data = TimeSeries.read(files, start=t_i, end=t_f, format='hdf5.gwosc',verbose=False)
     return data
@@ -138,7 +137,7 @@ def make_save_spec(segment,files,detector):
 
     start_time = time.time()
     
-    download_segment(files)
+    download_segment(files, detector)
     
     first = True
     
@@ -167,7 +166,7 @@ def make_save_spec(segment,files,detector):
             times = times[1000:]
             save_ind += 1
             
-    delete_segment(files,detector)
+    delete_segment(files)
     
     file_name = f'{detector}_segment_{segment[0]}_{segment[1]}_{save_ind}.npy'
     time_name = f'{detector}_segment_times_{segment[0]}_{segment[1]}_{save_ind}.npy'
@@ -194,6 +193,10 @@ procceced = None
 try:
     s3.download_file('tau-astro', f'gdevit/gw_data/O2/{detector}1/saved_segments.txt','saved_segments.txt')
     procceced = get_segments(f'saved_segments.txt')
+except:
+    print('no saved segements')
+    
+    
 
 segment_list = get_segments('./gw_torch/spec_prep/O2_BOTH.txt')
 
