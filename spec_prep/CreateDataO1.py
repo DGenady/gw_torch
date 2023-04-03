@@ -169,7 +169,7 @@ def make_spectrogram(data, Tc=256, To=2, Q=(16,16)):
 
     times = np.array(times)
     SNR_offset = np.array(SNR_offset)
-    SNR_norm = np.array(SNR)_norm
+    SNR_norm = np.array(SNR_norm)
     specs = np.array(specs)
     
     return specs, SNR_offset, SNR_norm, times
