@@ -158,7 +158,7 @@ def make_spectrogram(data, Tc=256, To=2, Q=(16,16)):
     while i + original_size < whitened_data.duration.value:
 
         cropped = whitened_data[i*frq:(i+original_size)*frq]
-        qt = cropped.q_transform(frange=(10, 2048), qrange=q, whiten=False, tres=tres, fres=fres, logf=True)
+        qt = cropped.q_transform(frange=(10, 2048), qrange=Q, whiten=False, tres=tres, fres=fres, logf=True)
         qt = qt[fres//2:-fres//2]
         SNR_offset.append(qt.min())
         qt += np.abs(qt.min())
