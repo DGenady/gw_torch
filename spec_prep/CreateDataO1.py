@@ -187,6 +187,8 @@ def get_TS_data(segment_files,t_i ,t_f):
 
 def make_save_spec(segment,files):
     
+    mismatch = 0
+    
     save_ind = 0
 
     start_time = time.time()
@@ -220,6 +222,7 @@ def make_save_spec(segment,files):
             
         if (H_times != L_times).any() :
             print('time between detector is incorrect')
+            mismatch += 1
 
         if H_spectrograms.shape[0] >= 1000:
             
@@ -260,6 +263,7 @@ def make_save_spec(segment,files):
     s3.put_object(Bucket='tau-astro', Key='gdevit/gw_data/O1/Both/'+file_name, Body=gw_data)
     
     print(f'finished segment {segment[0]}-{segment[1]} in {((time.time()-start_time)/60)}f minutes')
+    print(f'there were {mismatch} time mismatches')
     
     with open(f'saved_segments.txt', 'a') as fp:
         fp.write(f'{segment[0]} {segment[1]}\n')
@@ -296,5 +300,5 @@ else:
     pool = mp.Pool(mp.cpu_count() - 1)
     print(f'using {mp.cpu_count()-1} cpus')
 
-pool.starmap(make_save_spec, [(segment,{'H':H_files_for_segment[i],'L':L_files_for_segment[i]}) for i, segment in enumerate(segment_list)])
+pool.starmap(make_save_spec, [(segment,{'H':H_files_for_segment[i],'L':L_files_for_segment[i]}) for i, segment in enumerate(segment_list[:4])])
 print('done')
