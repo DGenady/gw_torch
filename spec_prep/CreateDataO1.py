@@ -180,7 +180,7 @@ def get_TS_data(segment_files,t_i ,t_f):
         detector = file[0:1]
         files.append(f'{detector}-{detector}1_LOSC_16_V1-{file[3:-5]}-4096.hdf5')
 
-    data = TimeSeries.read(files, start=t_i, end=t_f, format='hdf5.gwosc',verbose=False)
+    data = timeseries.TimeSeries.read(files, start=t_i, end=t_f, format='hdf5.gwosc',verbose=False)
     return data
 
 def make_save_spec(segment,files):
