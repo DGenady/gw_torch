@@ -189,16 +189,16 @@ def make_save_spec(segment,files):
 
     start_time = time.time()
     
-    download_segment(files{'H'})
-    download_segment(files{'L'})
+    download_segment(files['H'])
+    download_segment(files['L'])
     
     first = True
     
     chunks = get_chunks(t_i=segment[0], t_f=segment[1], Tc=256, To=2)
     
     for chunk in chunks:
-        H_strain = get_TS_data(files{'H'}, chunk[0], chunk[1])
-        L_strain = get_TS_data(files{'L'}, chunk[0], chunk[1])
+        H_strain = get_TS_data(files['H'], chunk[0], chunk[1])
+        L_strain = get_TS_data(files['L'], chunk[0], chunk[1])
         if first:
             H_spectrograms, H_SNR_offset, H_SNR_norm, H_times = make_spectrogram(H_strain)
             L_spectrograms, L_SNR_offset, L_SNR_norm, L_times = make_spectrogram(L_strain)
@@ -244,8 +244,8 @@ def make_save_spec(segment,files):
             
             
             
-    delete_segment(files{'H'},'H')
-    delete_segment(files{'L'},'L')
+    delete_segment(files['H'],'H')
+    delete_segment(files['L'],'L')
     
     gw_data = GWDATA(H = {'spectrograms':H_spectrograms,
                            'SNR':{'offset':H_SNR_offset, 'norm':H_SNR_norm}},
