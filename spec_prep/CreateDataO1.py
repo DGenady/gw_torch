@@ -287,9 +287,9 @@ segment_list, H_files_for_segment, L_files_for_segment = zip(*indices)
 
 numCPUs = mp.cpu_count() - 1
 
-if numCPUs > 16:
-    pool = mp.Pool(16)
-    print(f'using 16 cpus')
+if numCPUs > 32:
+    pool = mp.Pool(32)
+    print(f'using 32 cpus')
 else:    
     pool = mp.Pool(mp.cpu_count() - 1)
     print(f'using {mp.cpu_count()-1} cpus')
