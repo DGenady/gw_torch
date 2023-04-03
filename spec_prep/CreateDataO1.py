@@ -141,6 +141,8 @@ def make_spectrogram(data, Tc=256, To=2, Q=(16,16)):
             whitened_data = data.whiten(asd=ASD, fduration=2,
                                highpass=None)
     
+    frq = int(1/whitened.data.de.value)
+    
     # desired spectrogram duration and resolution
     duration = 2
     tres = duration/256
