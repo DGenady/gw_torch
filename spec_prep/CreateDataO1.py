@@ -223,7 +223,7 @@ def make_save_spec(segment,files):
 
         if H_spectrograms.shape[0] >= 1000:
             
-            file_name = f'segment_{H_times[0]}_{H_times[999]}.gwdata'
+            file_name = f'segment_{int(H_times[0])}_{int(H_times[999])}.gwdata'
             
             gw_data = GWDATA(H = {'spectrograms':H_spectrograms[:1000],
                                    'SNR':{'offset':H_SNR_offset[:1000], 'norm':H_SNR_norm[:1000]}},
@@ -256,7 +256,7 @@ def make_save_spec(segment,files):
                      times = H_times)
 
     gw_data = pickle.dumps(gw_data)
-    file_name = f'segment_{H_times[0]}_{H_times[-1]}.gwdata'
+    file_name = f'segment_{int(H_times[0])}_{int(H_times[-1])}.gwdata'
     s3.put_object(Bucket='tau-astro', Key='gdevit/gw_data/O1/Both/'+file_name, Body=gw_data)
     
     print(f'finished segment {segment[0]}-{segment[1]} in {((time.time()-start_time)/60)}f minutes')
