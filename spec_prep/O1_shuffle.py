@@ -95,14 +95,14 @@ random.shuffle(O1_files)
 
 numCPUs = mp.cpu_count() - 1
 
-if numCPUs > 32:
-    pool = mp.Pool(32)
-    print(f'using 32 cpus')
+if numCPUs > 16:
+    pool = mp.Pool(16)
+    print(f'using 16 cpus')
 else:    
     pool = mp.Pool(mp.cpu_count() - 1)
     print(f'using {mp.cpu_count()-1} cpus')
     
 fpt = 10 # files per thread
 
-pool.starmap(save_shuffle, [(i*fpt, O1_files[i*fpt:(i+1)*fpt]) for i in range(len(O1_files[:50])//fpt)])
+pool.starmap(save_shuffle, [(i*fpt, O1_files[i*fpt:(i+1)*fpt]) for i in range(len(O1_files)//fpt)])
 print('done')
