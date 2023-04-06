@@ -102,7 +102,7 @@ else:
     pool = mp.Pool(mp.cpu_count() - 1)
     print(f'using {mp.cpu_count()-1} cpus')
     
-fpt = 20 # files per thread
+fpt = 10 # files per thread
 
-pool.starmap(save_shuffle, [(i*fpt, O1_files[i*fpt:(i+1)*fpt]) for i in range(len(O1_files)//fpt)])
+pool.starmap(save_shuffle, [(i*fpt, O1_files[i*fpt:(i+1)*fpt]) for i in range(len(O1_files[:50])//fpt)])
 print('done')
