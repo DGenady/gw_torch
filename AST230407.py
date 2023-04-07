@@ -95,13 +95,15 @@ for object_summary in my_bucket.objects.filter(Prefix="gdevit/gw_data/O1/Both"):
     
 files = []
 
-for file in files_to_down[:1300]:
+files_to_down.remove('gdevit/gw_data/O1/Both/saved_segments.txt')
+
+for file in files_to_down[:130]:
     save_name = file.split('/')[-1]
     s3.download_file('tau-astro', file, 'data/'+save_name)
     files.append(save_name)
     
-train_files = files[:1000]
-val_files = files[1000:1300]
+train_files = files[:100]
+val_files = files[100:130]
 
 
 activation = {}
@@ -261,7 +263,7 @@ while epoch < epochs + 1:
         s3.upload_file(f'{save_name}_best.pt', 'tau-astro', f'gdevit/model/{save_name}/{save_name}_best.pt' )
         s3.upload_file(f'{save_name}_train_loss.npy', 'tau-astro', f'gdevit/model/{save_name}/{save_name}_train_loss.npy' )
         s3.upload_file(f'{save_name}_val_loss.npy', 'tau-astro', f'gdevit/model/{save_name}/{save_name}_val_loss.npy' )
-        s3.upload_file('output_text.txt', 'tau-astro', f'gdevit/model/output_text.txt; )
+        s3.upload_file('output_text.txt', 'tau-astro', f'gdevit/model/output_text.txt' )
     except: 
         trys += 1
         print('did not upload')
