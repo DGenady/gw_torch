@@ -189,7 +189,7 @@ while epoch < epochs + 1:
             L_imgs = data[1][0].to(device)
             L_labels = data[1][1].to(device)
             
-             with autocast():
+            with autocast():
                 L_output = ast_mdl(L_imgs)
                 L_latent = activation['ast']
                 
