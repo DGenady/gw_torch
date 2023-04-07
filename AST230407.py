@@ -71,8 +71,8 @@ class myDataset(Dataset):
         with open(path+self.file,'rb') as f:
             data = pickle.load(f)
             
-        H = data.H['spectrograms'].from_numpy(H).float()
-        L = data.L['spectrograms'].from_numpy(H).float()
+        H = torch.from_numpy(data.H['spectrograms']).float()
+        L = torch.from_numpy(data.L['spectrograms']).float()
         
         H_labels = torch.zeros(H.size(0))
         L_labels = torch.zeros(L.size(0)) + 1
