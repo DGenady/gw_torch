@@ -141,7 +141,7 @@ global_step, epoch = 0, 0
 lr = 1e-5
 print(f'started on 7/4/23 with {lr}')
 epochs = 40
-batch_size = 60
+batch_size = 200
 
 audio_trainables = [p for p in ast_mdl.parameters() if p.requires_grad]
 print('Total parameter number is : {:.9f} million'.format(sum(p.numel() for p in ast_mdl.parameters()) / 1e6))
