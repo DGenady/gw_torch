@@ -125,13 +125,13 @@ files_to_down.remove('gdevit/gw_data/O1/Both/saved_segments.txt')
 
 s3 = boto3.client('s3', endpoint_url = 'https://s3-west.nrp-nautilus.io')   
 
-for file in files_to_down[:23]:
+for file in files_to_down[:1300]:
     save_name = file.split('/')[-1]
     s3.download_file('tau-astro', file, 'data/'+save_name)
     files.append(save_name)
     
-train_files = files[:23]
-val_files = files[20:23]
+train_files = files[:1000]
+val_files = files[1000:1300]
 
 
 save_name = '230407'
