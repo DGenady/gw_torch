@@ -188,17 +188,17 @@ while epoch < epochs + 1:
                     print('warm-up learning rate is {:f}'.format(optimizer.param_groups[0]['lr']))
 
             with autocast():
-                H_output = ast_mdl(H_imgs)
-                H_latent = activation['ast']
+                H_output = ast_mdl(H_imgs).to('cuda:0')
+                H_latent = activation['ast'].to('cuda:0')
              
             L_imgs = data[1][0].to(device)
             L_labels = data[1][1].to(device)
             
             with autocast():
-                L_output = ast_mdl(L_imgs)
-                L_latent = activation['ast']
+                L_output = ast_mdl(L_imgs).to('cuda:0')
+                L_latent = activation['ast'].to('cuda:0')
                 
-                loss = loss_fn_1(H_output, H_labels.long()) + loss_fn_1(L_output, L_labels.long()) + 0.01*loss_fn_2(H_latent,L_latent.to('cuda:0')).mean()
+                loss = loss_fn_1(H_output, H_labels.long()) + loss_fn_1(L_output, L_labels.long()) + 0.01*loss_fn_2(H_latent,L_latent).mean()
           
             optimizer.zero_grad()
             scaler.scale(loss).backward()
@@ -224,17 +224,17 @@ while epoch < epochs + 1:
                 H_labels = data[0][1].to(device)
 
                 with autocast():
-                    H_output = ast_mdl(H_imgs)
-                    H_latent = activation['ast']
+                    H_output = ast_mdl(H_imgs).to('cuda:0')
+                    H_latent = activation['ast'].to('cuda:0')
              
                 L_imgs = data[1][0].to(device)
                 L_labels = data[1][1].to(device)
             
                 with autocast():
-                    L_output = ast_mdl(L_imgs)
-                    L_latent = activation['ast']
+                    L_output = ast_mdl(L_imgs).to('cuda:0')
+                    L_latent = activation['ast'].to('cuda:0')
                 
-                    loss = loss_fn_1(H_output, H_labels.long()) + loss_fn_1(L_output, L_labels.long()) + 0.01*loss_fn_2(H_latent,L_latent.to('cuda:0')).mean()
+                    loss = loss_fn_1(H_output, H_labels.long()) + loss_fn_1(L_output, L_labels.long()) + 0.01*loss_fn_2(H_latent,L_latent).mean()
                 
                 losses.append(loss.item())
     
