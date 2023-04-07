@@ -110,7 +110,7 @@ if torch.cuda.device_count() > 1:
     ast_mdl  = nn.DataParallel(ast_mdl)
 
 ast_mdl.to(device)
-ast_mdl.module.ast.register_forward_hook(get_activation('module.ast'))
+ast_mdl.module.ast.register_forward_hook(get_activation('ast'))
 
 s3 = boto3.resource('s3', endpoint_url = 'https://s3-west.nrp-nautilus.io')   
 my_bucket = s3.Bucket('tau-astro')
@@ -132,9 +132,6 @@ for file in files_to_down[:23]:
     
 train_files = files[:23]
 val_files = files[20:23]
-
-
-
 
 
 save_name = '230407'
