@@ -198,7 +198,7 @@ while epoch < epochs + 1:
                 L_output = ast_mdl(L_imgs)
                 L_latent = activation['ast']
                 
-                loss = loss_fn_1(H_output, H_labels.long()) + loss_fn_1(L_output, L_labels.long()) # + 0.01*loss_fn_2(H_latent,L_latent)
+                loss = loss_fn_1(H_output, H_labels.long()) + loss_fn_1(L_output, L_labels.long()) + loss_fn_2(H_latent,L_latent)
           
             optimizer.zero_grad()
             scaler.scale(loss).backward()
@@ -219,6 +219,9 @@ while epoch < epochs + 1:
             val_loader = DataLoader(dataset=myDataset(file=file,path=path), batch_size=batch_size, shuffle=True)   
 
             for data in val_loader:
+                
+                H_imgs = data[0][0].to(device)
+                H_labels = data[0][1].to(device)
 
                 with autocast():
                     H_output = ast_mdl(H_imgs)
