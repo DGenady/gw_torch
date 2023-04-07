@@ -61,7 +61,7 @@ class myDataset(Dataset):
         self.data = self.load_data(path)
             
     def __getitem__(self, index):
-        return (self.data[0][0][index],self.data[0][1][index],self.data[1][0][index],self.data[1][1][index])
+        return ((self.data[0][0][index],self.data[0][1][index]),(self.data[1][0][index],self.data[1][1][index]))
 
     def __len__(self):
         return self.len
