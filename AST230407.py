@@ -53,6 +53,7 @@ class ast_mod(nn.Module):
         x = self.last_layer(x)
         return x
     
+    
 class myDataset(Dataset):
     
     def __init__(self, file,path):
