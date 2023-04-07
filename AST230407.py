@@ -131,7 +131,7 @@ if torch.cuda.device_count() > 1:
     ast_mdl  = nn.DataParallel(ast_mdl)
 
 ast_mdl.to(device)
-ast_mdl.ast.register_forward_hook(get_activation('ast'))
+ast_mdl.ast.register_forward_hook(get_activation('module.ast'))
 
 
 save_name = '230407'
