@@ -61,7 +61,7 @@ class myDataset(Dataset):
         self.data = self.load_data(path)
             
     def __getitem__(self, index):
-        return (self.data[0][index],self.data[1][index])
+        return (self.data[0][0][index],self.data[0][1][index],self.data[1][0][index],self.data[1][1][index])
 
     def __len__(self):
         return self.len
@@ -99,13 +99,13 @@ files_to_down.remove('gdevit/gw_data/O1/Both/saved_segments.txt')
 
 s3 = boto3.client('s3', endpoint_url = 'https://s3-west.nrp-nautilus.io')   
 
-for file in files_to_down[:130]:
+for file in files_to_down[:23]:
     save_name = file.split('/')[-1]
     s3.download_file('tau-astro', file, 'data/'+save_name)
     files.append(save_name)
     
-train_files = files[:100]
-val_files = files[100:130]
+train_files = files[:23]
+val_files = files[20:23]
 
 
 activation = {}
