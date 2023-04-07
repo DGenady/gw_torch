@@ -198,7 +198,7 @@ while epoch < epochs + 1:
                 L_output = ast_mdl(L_imgs)
                 L_latent = activation['ast']
                 
-                loss = loss_fn_1(H_output, H_labels.long()) + loss_fn_1(L_output, L_labels.long()) + 0.01*loss_fn_2(H_latent,L_latent).mean().to('cuda:1')
+                loss = loss_fn_1(H_output, H_labels.long()) + loss_fn_1(L_output, L_labels.long()) + 0.01*loss_fn_2(H_latent,L_latent.to('cuda:1')).mean()
           
             optimizer.zero_grad()
             scaler.scale(loss).backward()
@@ -234,7 +234,7 @@ while epoch < epochs + 1:
                     L_output = ast_mdl(L_imgs)
                     L_latent = activation['ast']
                 
-                    loss = loss_fn_1(H_output, H_labels.long()) + loss_fn_1(L_output, L_labels.long()) + 0.01*loss_fn_2(H_latent,L_latent).mean().to('cuda:1')
+                    loss = loss_fn_1(H_output, H_labels.long()) + loss_fn_1(L_output, L_labels.long()) + 0.01*loss_fn_2(H_latent,L_latent.to('cuda:1')).mean()
                 
                 losses.append(loss.item())
     
