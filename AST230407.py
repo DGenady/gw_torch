@@ -86,7 +86,7 @@ class myDataset(Dataset):
     
         return (H,H_labels), (L,L_labels)
     
-s3 = boto3.client('s3', endpoint_url = 'https://s3-west.nrp-nautilus.io')   
+s3 = boto3.resource('s3', endpoint_url = 'https://s3-west.nrp-nautilus.io')   
 my_bucket = s3.Bucket('tau-astro')
 files_to_down = []
 
@@ -96,6 +96,8 @@ for object_summary in my_bucket.objects.filter(Prefix="gdevit/gw_data/O1/Both"):
 files = []
 
 files_to_down.remove('gdevit/gw_data/O1/Both/saved_segments.txt')
+
+s3 = boto3.client('s3', endpoint_url = 'https://s3-west.nrp-nautilus.io')   
 
 for file in files_to_down[:130]:
     save_name = file.split('/')[-1]
