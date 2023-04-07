@@ -87,27 +87,6 @@ class myDataset(Dataset):
     
         return (H,H_labels), (L,L_labels)
     
-s3 = boto3.resource('s3', endpoint_url = 'https://s3-west.nrp-nautilus.io')   
-my_bucket = s3.Bucket('tau-astro')
-files_to_down = []
-
-for object_summary in my_bucket.objects.filter(Prefix="gdevit/gw_data/O1/Both"):
-    files_to_down.append(object_summary.key)
-    
-files = []
-
-files_to_down.remove('gdevit/gw_data/O1/Both/saved_segments.txt')
-
-s3 = boto3.client('s3', endpoint_url = 'https://s3-west.nrp-nautilus.io')   
-
-for file in files_to_down[:23]:
-    save_name = file.split('/')[-1]
-    s3.download_file('tau-astro', file, 'data/'+save_name)
-    files.append(save_name)
-    
-train_files = files[:23]
-val_files = files[20:23]
-
 
 activation = {}
 def get_activation(name):
@@ -131,7 +110,31 @@ if torch.cuda.device_count() > 1:
     ast_mdl  = nn.DataParallel(ast_mdl)
 
 ast_mdl.to(device)
-ast_mdl.ast.register_forward_hook(get_activation('module.ast'))
+ast_mdl.module.ast.register_forward_hook(get_activation('module.ast'))
+
+s3 = boto3.resource('s3', endpoint_url = 'https://s3-west.nrp-nautilus.io')   
+my_bucket = s3.Bucket('tau-astro')
+files_to_down = []
+
+for object_summary in my_bucket.objects.filter(Prefix="gdevit/gw_data/O1/Both"):
+    files_to_down.append(object_summary.key)
+    
+files = []
+
+files_to_down.remove('gdevit/gw_data/O1/Both/saved_segments.txt')
+
+s3 = boto3.client('s3', endpoint_url = 'https://s3-west.nrp-nautilus.io')   
+
+for file in files_to_down[:23]:
+    save_name = file.split('/')[-1]
+    s3.download_file('tau-astro', file, 'data/'+save_name)
+    files.append(save_name)
+    
+train_files = files[:23]
+val_files = files[20:23]
+
+
+
 
 
 save_name = '230407'
