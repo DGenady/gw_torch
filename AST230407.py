@@ -269,7 +269,7 @@ while epoch < epochs + 1:
         s3.upload_file(f'{save_name}_best.pt', 'tau-astro', f'gdevit/model/{save_name}/{save_name}_best.pt' )
         s3.upload_file(f'{save_name}_train_loss.npy', 'tau-astro', f'gdevit/model/{save_name}/{save_name}_train_loss.npy' )
         s3.upload_file(f'{save_name}_val_loss.npy', 'tau-astro', f'gdevit/model/{save_name}/{save_name}_val_loss.npy' )
-        s3.upload_file('output_text.txt', 'tau-astro', f'gdevit/model/output_text.txt' )
+        s3.upload_file('output_text.txt', 'tau-astro', f'gdevit/model/{save_name}/output_text.txt' )
     except: 
         trys += 1
         print('did not upload')
