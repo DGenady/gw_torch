@@ -134,7 +134,7 @@ train_files = files[:1000]
 val_files = files[1000:1300]
 
 
-save_name = '230407'
+save_name = '230408'
 path = 'data/'
 
 global_step, epoch = 0, 0
