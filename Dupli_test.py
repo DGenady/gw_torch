@@ -14,6 +14,14 @@ class GWDATA:
     def save(self,path):
         with open(path, "wb") as f:
             pickle.dump(self, f, protocol=pickle.HIGHEST_PROTOCOL)
+            
+s3 = boto3.resource('s3',endpoint_url='https://s3-west.nrp-nautilus.io')
+my_bucket = s3.Bucket('tau-astro')
+
+O1_files = []
+
+for object_summary in my_bucket.objects.filter(Prefix="gdevit/gw_data/O1/shuffled/"):
+    O1_files.append(object_summary.key)
 
 s3 = boto3.client('s3',endpoint_url='https://s3-west.nrp-nautilus.io')
 
