@@ -2,6 +2,7 @@ import time
 import boto3
 import os
 import pickle
+import numpy as np
 
 class GWDATA:
     
