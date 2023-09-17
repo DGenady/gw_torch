@@ -1,13 +1,11 @@
+# this file needs to be moved to ast/src directory to work.
 import numpy as np
 import torch
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
-import argparse
-import timm
 from models import ASTModel
 from torch.cuda.amp import autocast,GradScaler
 import time
-import boto3
 import pickle
 from random import shuffle
 import os
@@ -44,7 +42,7 @@ class ast_mod(nn.Module):
     
 class myDataset(Dataset):
     
-    def __init__(self, H_files, L_files, total_length):
+    def __init__(self, H_files, L_files, total_length, logfile=None):
         self.H_files = H_files
         self.L_files = L_files
         self.H_data = []
@@ -54,28 +52,46 @@ class myDataset(Dataset):
         self.len = total_length
         self.H_ind = 0
         self.L_ind = 0
-
+        self.logfile = logfile
+        self.log_out = []
         shuffle(self.H_files)
         shuffle(self.L_files)
 
     def __getitem__(self, index):
-        if len(self.H_data) == 0 or len(self.L_data) == 0:
+        while len(self.H_data) == 0 or len(self.L_data) == 0:
             if self.H_ind >= len(self.H_files) or self.L_ind >= len(self.L_files):
                 raise StopIteration
 
-            H_data, H_labels = self.load_data(self.H_files[self.H_ind], "H")
-            L_data, L_labels = self.load_data(self.L_files[self.L_ind], "L")
-            self.H_data += H_data
-            self.L_data += L_data
-            self.H_labels += H_labels
-            self.L_labels += L_labels
-        H_sample = self.H_data.pop(), self.H_labels
-        L_sample = self.L_data.pop(), self.L_labels
+            if len(self.H_data) == 0:
+                H_data, H_labels = self.load_data(self.H_files[self.H_ind], "H")
+                self.H_data += H_data
+                self.H_labels = H_labels
+                self.H_ind = 0
+            else:
+                L_data, L_labels = self.load_data(self.L_files[self.L_ind], "L")
+                self.L_data += L_data
+                self.L_labels = L_labels
+                self.L_ind = 0
+        H_sample = self.H_data.pop(), self.H_labels[self.H_ind]
+        L_sample = self.L_data.pop(), self.L_labels[self.L_ind]
+        self.H_ind += 1
+        self.L_ind += 1
         return H_sample, L_sample
 
     def __len__(self):
         return self.len
-    
+
+
+    def log(self, messege):
+        if self.logfile is None:
+            print(messege)
+            return
+
+        self.log_out.append(messege)
+        with open(self.logfile, 'w') as f:
+            for msg in self.log_out[-100:]:
+                f.write("%s\n" % msg)
+
     def load_data(self, path, detector):
         
         with open(path, 'rb') as f:
@@ -84,11 +100,14 @@ class myDataset(Dataset):
 
         specs = [x['clean_spec'] for x in data]
         data = [torch.from_numpy(spec).float() for spec in specs]
+        # log files with fewer data
+        # if len(data) < 10:
+        #     self.log(f"opened file {path}\nnumber of specs: {len(data)}")
 
         if detector == "H":
-            labels = [torch.zeros_like(x) for x in data]
+            labels = torch.zeros(len(data))
         elif detector == "L":
-            labels = [torch.ones_like(x) for x in data]
+            labels = torch.ones(len(data))
         else:
             raise Exception(f"detector {detector} not supported")
         shuffle(data)
@@ -104,7 +123,7 @@ def get_activation(name):
 ast_mdl = ast_mod(label_dim=32, 
                   fstride=10, tstride=10, 
                   input_fdim=256, input_tdim=256, 
-                  imagenet_pretrain=True, 
+                  imagenet_pretrain=False,
                   audioset_pretrain=False, 
                   model_size='tiny224')
                   
@@ -125,14 +144,14 @@ data_path = os.path.join(scratch_path, "O3_training_data/")
 cfs_path = f"/global/cfs/projectdirs/{project_name}"
 training_job_name = f"ast-training-{time.strftime('%Y%m%d-%H%M%S')}"
 save_path = os.path.join(cfs_path, training_job_name)
-if not os.listdir(save_path):
-    os.mkdir(save_path)
+if not os.path.isdir(save_path):
+    os.makedirs(save_path, exist_ok=True)
 
 H_files = [os.path.join(data_path, x) for x in os.listdir(data_path) if x.startswith("H")]
 L_files = [os.path.join(data_path, x) for x in os.listdir(data_path) if x.startswith("L")]
 
-train_frac = 0.8
-specs_per_file = 5
+train_frac = 0.75
+specs_per_file = 1645
 
 H_train_files = H_files[:int(len(H_files)*train_frac)]
 H_val_files = H_files[int(len(H_files)*train_frac):]
@@ -141,14 +160,15 @@ L_val_files = L_files[int(len(L_files)*train_frac):]
 
 train_ds_size = min(len(H_train_files)*specs_per_file, len(L_train_files)*specs_per_file)
 val_ds_size = min(len(H_val_files)*specs_per_file, len(L_val_files)*specs_per_file)
-
+print(f"train_ds size = {train_ds_size}")
+print(f"val_ds size = {val_ds_size}")
 
 
 global_step, epoch = 0, 0
 lr = 1e-5
 print(f'started with {lr}')
 epochs = 40
-batch_size = 120
+batch_size = 64
 
 audio_trainables = [p for p in ast_mdl.parameters() if p.requires_grad]
 print('Total parameter number is : {:.9f} million'.format(sum(p.numel() for p in ast_mdl.parameters()) / 1e6))
@@ -160,7 +180,6 @@ scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', fa
 loss_fn_1 = nn.CrossEntropyLoss()
 loss_fn_2 = nn.CosineSimilarity()
 
-epoch += 1
 
 train_loss = []
 val_loss = []
@@ -176,8 +195,18 @@ while epoch < epochs + 1:
     # Training step
     losses = []
     ast_mdl.train()
-    train_ds = myDataset(H_train_files, L_train_files, total_length=train_ds_size)
-    val_ds = myDataset(H_val_files, L_val_files, total_length=val_ds_size)
+    train_ds = myDataset(
+        H_train_files,
+        L_train_files,
+        total_length=train_ds_size,
+        logfile=os.path.join(save_path, "train_ds.log")
+    )
+    val_ds = myDataset(
+        H_val_files,
+        L_val_files,
+        total_length=val_ds_size,
+        logfile=os.path.join(save_path, "val_ds.log")
+    )
 
     train_loader = DataLoader(train_ds, batch_size=batch_size)
     val_loader = DataLoader(val_ds, batch_size=batch_size)
@@ -267,8 +296,3 @@ while epoch < epochs + 1:
     epoch += 1
 
 print(f'Done in {(time.time()-start_time)/60:.2f} minutes')
-
-
-
-
-   
