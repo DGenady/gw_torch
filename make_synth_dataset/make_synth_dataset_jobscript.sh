@@ -8,7 +8,7 @@
 #SBATCH --account=m4443
 #SBATCH -t 01:00:00
 
-#set up environment
+# --- set up environment ---:
 #module load python
 #conda activate /global/common/software/m4443/tomerh_envs/pycbc_env
 
@@ -18,4 +18,4 @@ export OMP_PLACES=threads
 export OMP_PROC_BIND=spread
 
 #run the application:
-srun -n 20 -c 12 --cpu_bind=cores python make_synth_dataset/main-mpi.py
+srun -n 20 -c 12 --cpu_bind=cores python gw_torch/make_synth_dataset/main-mpi.py
