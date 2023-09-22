@@ -3,7 +3,8 @@ import pickle
 
 project_name = "m4443"
 scratch_path = os.environ.get("PSCRATCH")
-data_path = os.path.join(scratch_path, "O3_training_data/")
+OGWSC_run  = "O1"
+data_path = os.path.join(scratch_path, f"{OGWSC_run}_training_data/")
 files = [os.path.join(data_path, x) for x in os.listdir(data_path)]
 for file in files:
     with open(file, "rb") as f:

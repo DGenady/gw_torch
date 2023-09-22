@@ -45,6 +45,8 @@ class myDataset(Dataset):
     def __init__(self, H_files, L_files, total_length, logfile=None):
         self.H_files = H_files
         self.L_files = L_files
+        self.H_file_ind = 0
+        self.L_file_ind = 0
         self.H_data = []
         self.L_data = []
         self.H_labels = []
@@ -53,25 +55,31 @@ class myDataset(Dataset):
         self.H_ind = 0
         self.L_ind = 0
         self.logfile = logfile
-        self.log_out = []
         shuffle(self.H_files)
         shuffle(self.L_files)
 
     def __getitem__(self, index):
+        # if lists of specs are empty, load more from files
         while len(self.H_data) == 0 or len(self.L_data) == 0:
-            if self.H_ind >= len(self.H_files) or self.L_ind >= len(self.L_files):
+            # if no more files to load, raise stopIteration
+            if self.H_file_ind >= len(self.H_files)-1 or self.L_file_ind >= len(self.L_files)-1:
                 raise StopIteration
 
+            # load H file
             if len(self.H_data) == 0:
-                H_data, H_labels = self.load_data(self.H_files[self.H_ind], "H")
+                H_data, H_labels = self.load_data(self.H_files[self.H_file_ind], "H")
                 self.H_data += H_data
                 self.H_labels = H_labels
+                self.H_file_ind += 1
                 self.H_ind = 0
+            # load L file
             else:
-                L_data, L_labels = self.load_data(self.L_files[self.L_ind], "L")
+                L_data, L_labels = self.load_data(self.L_files[self.L_file_ind], "L")
                 self.L_data += L_data
                 self.L_labels = L_labels
+                self.L_file_ind += 1
                 self.L_ind = 0
+        # pop samples from both detectors
         H_sample = self.H_data.pop(), self.H_labels[self.H_ind]
         L_sample = self.L_data.pop(), self.L_labels[self.L_ind]
         self.H_ind += 1
@@ -83,14 +91,11 @@ class myDataset(Dataset):
 
 
     def log(self, messege):
-        if self.logfile is None:
+        if self.logfile is not None:
+            with open(self.logfile, 'a') as f:
+                f.write(messege)
+        else:
             print(messege)
-            return
-
-        self.log_out.append(messege)
-        with open(self.logfile, 'w') as f:
-            for msg in self.log_out[-100:]:
-                f.write("%s\n" % msg)
 
     def load_data(self, path, detector):
         
@@ -139,10 +144,11 @@ ast_mdl.to(device)
 ast_mdl.module.ast.register_forward_hook(get_activation('ast'))
 
 project_name = "m4443"
+OGWSC_run = "O1"
 scratch_path = os.environ.get("PSCRATCH")
-data_path = os.path.join(scratch_path, "O3_training_data/")
+data_path = os.path.join(scratch_path, f"{OGWSC_run}_training_data/")
 cfs_path = f"/global/cfs/projectdirs/{project_name}"
-training_job_name = f"ast-training-{time.strftime('%Y%m%d-%H%M%S')}"
+training_job_name = f"ast-training-{OGWSC_run}-{time.strftime('%Y%m%d-%H%M%S')}"
 save_path = os.path.join(cfs_path, training_job_name)
 if not os.path.isdir(save_path):
     os.makedirs(save_path, exist_ok=True)
