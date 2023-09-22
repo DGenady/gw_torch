@@ -59,6 +59,8 @@ class myDataset(Dataset):
         shuffle(self.L_files)
 
     def __getitem__(self, index):
+        if index % 5000 == 0:
+            self.log(f"loading sample number {index}")
         # if lists of specs are empty, load more from files
         while len(self.H_data) == 0 or len(self.L_data) == 0:
             # if no more files to load, raise stopIteration
@@ -105,9 +107,6 @@ class myDataset(Dataset):
 
         specs = [x['clean_spec'] for x in data]
         data = [torch.from_numpy(spec).float() for spec in specs]
-        # log files with fewer data
-        # if len(data) < 10:
-        #     self.log(f"opened file {path}\nnumber of specs: {len(data)}")
 
         if detector == "H":
             labels = torch.zeros(len(data))
@@ -205,13 +204,13 @@ while epoch < epochs + 1:
         H_train_files,
         L_train_files,
         total_length=train_ds_size,
-        logfile=os.path.join(save_path, "train_ds.log")
+        # logfile=os.path.join(save_path, "train_ds.log")
     )
     val_ds = myDataset(
         H_val_files,
         L_val_files,
         total_length=val_ds_size,
-        logfile=os.path.join(save_path, "val_ds.log")
+        # logfile=os.path.join(save_path, "val_ds.log")
     )
 
     train_loader = DataLoader(train_ds, batch_size=batch_size)
@@ -229,15 +228,15 @@ while epoch < epochs + 1:
                 print('warm-up learning rate is {:f}'.format(optimizer.param_groups[0]['lr']))
 
         with autocast():
-            H_output = ast_mdl(H_imgs).to('cuda:0')
-            H_latent = activation['ast'].to('cuda:0')
+            H_output = ast_mdl(H_imgs).to(device)
+            H_latent = activation['ast'].to(device)
 
         L_imgs = data[1][0].to(device)
         L_labels = data[1][1].to(device)
 
         with autocast():
-            L_output = ast_mdl(L_imgs).to('cuda:0')
-            L_latent = activation['ast'].to('cuda:0')
+            L_output = ast_mdl(L_imgs).to(device)
+            L_latent = activation['ast'].to(device)
 
             loss = loss_fn_1(H_output, H_labels.long()) + loss_fn_1(L_output, L_labels.long()) + 0.01*loss_fn_2(H_latent,L_latent).mean()
 
@@ -261,15 +260,15 @@ while epoch < epochs + 1:
             H_labels = data[0][1].to(device)
 
             with autocast():
-                H_output = ast_mdl(H_imgs).to('cuda:0')
-                H_latent = activation['ast'].to('cuda:0')
+                H_output = ast_mdl(H_imgs).to(device)
+                H_latent = activation['ast'].to(device)
 
             L_imgs = data[1][0].to(device)
             L_labels = data[1][1].to(device)
 
             with autocast():
-                L_output = ast_mdl(L_imgs).to('cuda:0')
-                L_latent = activation['ast'].to('cuda:0')
+                L_output = ast_mdl(L_imgs).to(device)
+                L_latent = activation['ast'].to(device)
 
                 loss = loss_fn_1(H_output, H_labels.long()) + loss_fn_1(L_output, L_labels.long()) + 0.01*loss_fn_2(H_latent,L_latent).mean()
 
