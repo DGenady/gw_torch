@@ -1,6 +1,7 @@
 import os
 import requests
 from multiprocessing.pool import ThreadPool
+from multiprocessing import cpu_count
 from time import perf_counter
 from random import shuffle
 
@@ -16,10 +17,11 @@ def download_file(url, save_path):
 
     return url, True
 
-max_files = 1000
-WGOSC_run = "O3"
+max_files = 2000
+num_threads = 32
+WGOSC_run = "O1"
 project_name = "m4443"
-project_path = f"/global/cfs/cdirs/{project_name}/O3_data/"
+project_path = f"/global/cfs/cdirs/{project_name}/{WGOSC_run}_data/"
 
 
 with open(f'./spec_prep/{WGOSC_run}_H1.txt', 'r') as f:
@@ -33,7 +35,7 @@ L1_save_paths = ['L1_' + x.split('-')[-2] + '.hdf5' for x in L1_list if len(x)>0
 
 H1_save_paths = [os.path.join(project_path, x) for x in H1_save_paths]
 L1_save_paths = [os.path.join(project_path, x) for x in L1_save_paths]
-with ThreadPool(16) as pool:
+with ThreadPool(num_threads) as pool:
     H_combined_list = list(zip(H1_list, H1_save_paths))[:max_files]
     L_combined_list = list(zip(L1_list, L1_save_paths))[:max_files]
     combined = H_combined_list + L_combined_list
