@@ -9,7 +9,6 @@ import time
 import pickle
 from random import shuffle
 import os
-
 class ast_mod(nn.Module):
     
     def __init__(self, label_dim=527, fstride=10, tstride=10, input_fdim=128, input_tdim=1024, imagenet_pretrain=True, audioset_pretrain=False, model_size='base384', verbose=True):
