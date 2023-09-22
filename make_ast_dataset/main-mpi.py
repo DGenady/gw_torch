@@ -53,19 +53,23 @@ def process_file(strain_file, detector, save_path):
 
 if __name__ == "__main__":
     project_name = 'm4443'
-    GWOSC_run = 'O3'
+    GWOSC_run = 'O1'
+    max_files = 2000
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
     size = comm.Get_size()
     print(rank)
     data_path = f'/global/cfs/cdirs/{project_name}/{GWOSC_run}_data/'
     save_path = f"/global/cfs/cdirs/{project_name}/ast_training_data/{GWOSC_run}_training_data/"
+    logs_path = os.path.join(save_path, "worker_logs")
     if not os.path.isdir(save_path):
         os.makedirs(save_path, exist_ok=True)
+    if not os.path.isdir(logs_path):
+        os.makedirs(logs_path, exist_ok=True)
 
     data_files = os.listdir(data_path)
-    H_files = [x for x in data_files if x.startswith("H")][100:400]
-    L_files = [x for x in data_files if x.startswith("L")][100:400]
+    H_files = [x for x in data_files if x.startswith("H")][:max_files]
+    L_files = [x for x in data_files if x.startswith("L")][:max_files]
 
     H_range = int((rank / size) * len(H_files)), int(((rank + 1) / size) * len(H_files))
     L_range = int((rank / size) * len(L_files)), int(((rank + 1) / size) * len(L_files))
@@ -83,6 +87,6 @@ if __name__ == "__main__":
         failed += H_failed
         failed += L_failed
     if len(failed) > 0:
-        with open(os.path.join(save_path, f"failed_worker_{rank}.json"), "w") as f:
+        with open(os.path.join(logs_path, f"failed_worker_{rank}.json"), "w") as f:
             json.dump(failed, f)
     print(f"worker {rank}: existing")
