@@ -127,7 +127,7 @@ def get_activation(name):
 ast_mdl = ast_mod(label_dim=32, 
                   fstride=10, tstride=10, 
                   input_fdim=256, input_tdim=256, 
-                  imagenet_pretrain=False,
+                  imagenet_pretrain=True,
                   audioset_pretrain=False, 
                   model_size='tiny224')
                   
