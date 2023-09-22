@@ -18,4 +18,4 @@ export OMP_PROC_BIND=spread
 # conda activate pytorch_env (clone of module pytorch with timm==0.4.5 and wget installed)
 #run the application:
 #applications may perform better with --gpu-bind=none instead of --gpu-bind=single:1
-srun -n 2 -c 64 --cpu_bind=cores -G 2 --gpu-bind=none  python /global/homes/t/tomerh/gw_torch/train_ast_nersc.py
+srun -n 2 -c 64 --cpu_bind=cores -G 2 --gpu-bind=none  python /global/homes/t/tomerh/ast/src/train_ast_nersc.py
