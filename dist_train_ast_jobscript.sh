@@ -1,12 +1,12 @@
 #!/bin/bash
-#SBATCH -N 2
+#SBATCH -N 1
 #SBATCH -C gpu
-#SBATCH -G 8
+#SBATCH -G 4
 #SBATCH -q regular
-#SBATCH -J train-dist-ast-O1
+#SBATCH -J train-O3-ast-dist
 #SBATCH --mail-user=hacohen0tomer@gmail.com
 #SBATCH --mail-type=ALL
-#SBATCH -t 04:30:00
+#SBATCH -t 03:30:00
 #SBATCH -A m4443
 
 #OpenMP settings:
@@ -25,4 +25,4 @@ export MASTER_PORT=29500
 
 #run the application:
 #applications may perform better with --gpu-bind=none instead of --gpu-bind=single:1
-srun -n 8 -c 32 --cpu_bind=cores -G 8 --gpu-bind=single:1  python /global/homes/t/tomerh/ast/src/dist_training.py
+srun -n 4 -c 32 --cpu_bind=cores -G 4 --gpu-bind=single:1  python /global/homes/t/tomerh/ast/src/dist_training.py

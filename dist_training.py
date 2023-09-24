@@ -116,10 +116,10 @@ ast_mdl.module.ast.register_forward_hook(get_activation('ast')) # model wraped i
 loader_n_workers = 1
 
 project_name = "m4443"
-OGWSC_run = "O1"
+OGWSC_run = "O3"
 scratch_path = os.environ.get("PSCRATCH")
 data_path = os.path.join(scratch_path, f"{OGWSC_run}_training_data_dist/")
-cfs_path = f"/global/cfs/projectdirs/{project_name}"
+cfs_path = f"/global/cfs/projectdirs/{project_name}/ast_training_runs/"
 training_job_name = f"ast-training-{OGWSC_run}-{time.strftime('%Y%m%d-%H%M%S')}"
 save_path = os.path.join(cfs_path, training_job_name)
 
@@ -141,7 +141,7 @@ global_step, epoch = 0, 0
 lr = 1e-5
 print(f'started with {lr}')
 epochs = 40
-batch_size = 128
+batch_size = 1024
 
 audio_trainables = [p for p in ast_mdl.parameters() if p.requires_grad]
 print('Total parameter number is : {:.9f} million'.format(sum(p.numel() for p in ast_mdl.parameters()) / 1e6))
