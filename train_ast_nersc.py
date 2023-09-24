@@ -58,8 +58,8 @@ class myDataset(Dataset):
         shuffle(self.L_files)
 
     def __getitem__(self, index):
-        if index % 5000 == 0:
-            self.log(f"loading sample number {index}")
+        # if index % 5000 == 0:
+        #     self.log(f"loading sample number {index}")
         # if lists of specs are empty, load more from files
         while len(self.H_data) == 0 or len(self.L_data) == 0:
             # if no more files to load, raise stopIteration
@@ -126,7 +126,7 @@ def get_activation(name):
 ast_mdl = ast_mod(label_dim=32, 
                   fstride=10, tstride=10, 
                   input_fdim=256, input_tdim=256, 
-                  imagenet_pretrain=True,
+                  imagenet_pretrain=False,
                   audioset_pretrain=False, 
                   model_size='tiny224')
                   
@@ -151,11 +151,12 @@ save_path = os.path.join(cfs_path, training_job_name)
 if not os.path.isdir(save_path):
     os.makedirs(save_path, exist_ok=True)
 
-H_files = [os.path.join(data_path, x) for x in os.listdir(data_path) if x.startswith("H")]
-L_files = [os.path.join(data_path, x) for x in os.listdir(data_path) if x.startswith("L")]
+max_files = 300
+H_files = [os.path.join(data_path, x) for x in os.listdir(data_path) if x.startswith("H")][:max_files]
+L_files = [os.path.join(data_path, x) for x in os.listdir(data_path) if x.startswith("L")][:max_files]
 
 train_frac = 0.75
-specs_per_file = 1645
+specs_per_file = 1632
 
 H_train_files = H_files[:int(len(H_files)*train_frac)]
 H_val_files = H_files[int(len(H_files)*train_frac):]
@@ -172,7 +173,7 @@ global_step, epoch = 0, 0
 lr = 1e-5
 print(f'started with {lr}')
 epochs = 40
-batch_size = 64
+batch_size = 128
 
 audio_trainables = [p for p in ast_mdl.parameters() if p.requires_grad]
 print('Total parameter number is : {:.9f} million'.format(sum(p.numel() for p in ast_mdl.parameters()) / 1e6))
@@ -215,8 +216,9 @@ while epoch < epochs + 1:
     train_loader = DataLoader(train_ds, batch_size=batch_size)
     val_loader = DataLoader(val_ds, batch_size=batch_size)
 
-    for data in train_loader:
-
+    for batch_ind, data in enumerate(train_loader):
+        if batch_ind % 500 == 0:
+            print(f"running batch # {batch_ind}")
         H_imgs = data[0][0].to(device)
         H_labels = data[0][1].to(device)
 
@@ -290,8 +292,9 @@ while epoch < epochs + 1:
     scheduler.step(val_loss[-1])
     
     # print the status
-    print(f'epoch: {epoch}, train loss: {train_loss[-1]:.5f}, validation loss: {val_loss[-1]:.5f} time: {(time.time()-start_time)/60:.2f} lr: {optimizer.param_groups[0]["lr"]}')
-    output_text.append(f'epoch: {epoch}, train loss: {train_loss[-1]:.5f}, validation loss: {val_loss[-1]:.5f} time: {(time.time()-start_time)/60:.2f} lr: {optimizer.param_groups[0]["lr"]}')
+    output_str = f'epoch: {epoch}, train loss: {train_loss[-1]:.5f}, validation loss: {val_loss[-1]:.5f} time: {(time.time()-start_time)/60:.2f} lr: {optimizer.param_groups[0]["lr"]}'
+    print(output_str)
+    output_text.append(output_str)
     
     with open(os.path.join(save_path, 'output_text.txt'),'w') as f:
         for string in output_text:
