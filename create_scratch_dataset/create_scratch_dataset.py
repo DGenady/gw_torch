@@ -1,11 +1,12 @@
 import os
 import pickle
 from tqdm import tqdm
+from config.conf import conf
 
-project_name = "m4443"
+project_name = conf['project_config']['project_name']
 cfs_path = f"/global/cfs/projectdirs/{project_name}/ast_training_data/"
 scratch_path = os.environ['PSCRATCH']
-OGWSC_run  = "O1"
+OGWSC_run = conf['run_config']['OGWSC_run']
 data_path = os.path.join(cfs_path, f"{OGWSC_run}_training_data/")
 output_path = os.path.join(scratch_path, f"{OGWSC_run}_training_data_dist/")
 if not os.path.isdir(output_path):

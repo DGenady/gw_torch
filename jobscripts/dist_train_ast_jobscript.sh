@@ -16,6 +16,7 @@ export OMP_PROC_BIND=spread
 
 export MASTER_ADDR=$(hostname)
 export MASTER_PORT=29500
+export WANDB_KEY=''
 
 # before running ther script, activate conda env:
 # conda activate pytorch_env (clone of module pytorch, pytorch downgraded to 1.13, with timm==0.4.5 and wget installed)
@@ -25,4 +26,4 @@ export MASTER_PORT=29500
 
 #run the application:
 #applications may perform better with --gpu-bind=none instead of --gpu-bind=single:1
-srun -n 4 -c 32 --cpu_bind=cores -G 4 --gpu-bind=single:1  python /global/homes/t/tomerh/ast/src/dist_training.py
+srun -n 4 -c 32 --cpu_bind=cores -G 4 --gpu-bind=single:1  python /global/homes/t/tomerh/gw_torch/training/dist_training.py

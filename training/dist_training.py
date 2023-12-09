@@ -1,13 +1,12 @@
 import numpy as np
 import torch
 import torch.nn as nn
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import DataLoader
 from torch.utils.data.distributed import DistributedSampler
 from torch.nn.parallel import DistributedDataParallel as DDP
 import torch.distributed as dist
 from torch.cuda.amp import autocast, GradScaler
 import time
-import pickle
 import os
 import wandb
 
@@ -128,6 +127,7 @@ if __name__ == '__main__':
     rank, n_ranks = init_workers()
     gpu = int(rank % device_count)
     device = torch.device(f'cuda:{gpu}')
+    print(f"device count for rank {rank} - {device_count}")
     print(f"rank: {rank} - using GPU {gpu}")
 
     # create model

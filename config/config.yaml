@@ -34,3 +34,12 @@ training_config:
 
   loss_fn_2_factor: 0.01
 
+data_config:
+  highpass_freq: 20
+  spec_duration: 2
+  q_transform:
+    frange: (10, 2048)
+    qrange: (16, 16)
+    whiten: True
+    logf: True
+

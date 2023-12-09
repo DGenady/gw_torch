@@ -1,24 +1,26 @@
 import scipy.signal as scisig
 import numpy as np
+from config.conf import conf
+data_conf = conf['data_config']
 
-def make_spectrogram(data, Tc=64, To=2):
+def make_spectrogram(data, To=2):
     if np.isnan(data.value).any():
         print('Nan in chunk')
         return
 
     data = data - data.mean()
-    data.highpass(frequency=20, filtfilt=True)
+    data.highpass(frequency=data_conf['highpass_freq'], filtfilt=True)
 
     Nc = len(data)
     Tc = Nc * data.dt.value
     window = scisig.tukey(M=Nc, alpha=1.0 * To / Tc, sym=True)
     data = data * window
 
-    duration = 2
+    duration = data_conf['spec_duration']
     tres = duration / 256
     fres = 256
 
-    qt = data.q_transform(frange=(10, 2048), qrange=(4, 64), whiten=True, tres=tres, fres=fres, logf=True)
+    qt = data.q_transform(tres=tres, fres=fres, **data_conf['q_transform'])
     qt = qt[int(To / duration / qt.dt.value):-int(To / duration / qt.dt.value)]
 
     two_sec_slice = int(2 / tres)

@@ -7,6 +7,9 @@ from file_processing import *
 from mpi4py import MPI
 import json
 
+from config.conf import conf
+data_conf = conf['data_config']
+
 
 def get_chunks_idxs(strain, segment_len):
     chunks = []
@@ -16,10 +19,6 @@ def get_chunks_idxs(strain, segment_len):
             chunks.append((i,i+segment_len))
     return chunks
 
-def scale_signal_to_snr(chunk, signal, known_snr):
-    snr = 10*np.log10(np.linalg.norm(signal)/np.linalg.norm(chunk)).value
-    new_sg = signal * np.power(10, (known_snr - snr) / 10 )
-    return new_sg
 
 def create_dataset(strain, segment_duration, **kwargs):
     results = []
@@ -33,6 +32,7 @@ def create_dataset(strain, segment_duration, **kwargs):
         results += [{"clean_spec": c, "times": t} for c, t in zip(clean_specs, times)]
 
     return results
+
 
 def process_file(strain_file, detector, save_path):
     print(f"loading file... {strain_file}")
@@ -52,13 +52,12 @@ def process_file(strain_file, detector, save_path):
     return failed
 
 if __name__ == "__main__":
-    project_name = 'm4443'
-    GWOSC_run = 'O1'
+    project_name = conf['project_config']['project_name']
+    GWOSC_run = conf['run_config']['OGWSC_run']
     max_files = 2000
     comm = MPI.COMM_WORLD
     rank = comm.Get_rank()
     size = comm.Get_size()
-    print(rank)
     data_path = f'/global/cfs/cdirs/{project_name}/{GWOSC_run}_data/'
     save_path = f"/global/cfs/cdirs/{project_name}/ast_training_data/{GWOSC_run}_training_data/"
     logs_path = os.path.join(save_path, "worker_logs")
