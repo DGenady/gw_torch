@@ -1,3 +1,5 @@
+import sys
+sys.path.append("/global/homes/t/tomerh/gw_torch")
 import os
 import pickle
 from tqdm import tqdm
