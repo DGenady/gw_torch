@@ -61,10 +61,11 @@ if __name__ == "__main__":
     data_path = f'/global/cfs/cdirs/{project_name}/{GWOSC_run}_data/'
     save_path = f"/global/cfs/cdirs/{project_name}/ast_training_data/{GWOSC_run}_training_data/"
     logs_path = os.path.join(save_path, "worker_logs")
-    if not os.path.isdir(save_path):
-        os.makedirs(save_path, exist_ok=True)
-    if not os.path.isdir(logs_path):
-        os.makedirs(logs_path, exist_ok=True)
+    if rank == 0:
+        if not os.path.isdir(save_path):
+            os.makedirs(save_path, exist_ok=True)
+        if not os.path.isdir(logs_path):
+            os.makedirs(logs_path, exist_ok=True)
 
     data_files = os.listdir(data_path)
     H_files = [x for x in data_files if x.startswith("H")][:max_files]
