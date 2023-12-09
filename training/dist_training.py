@@ -1,3 +1,6 @@
+import sys
+sys.path.append('/global/homes/t/tomerh/gw_torch')
+
 import numpy as np
 import torch
 import torch.nn as nn
