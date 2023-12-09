@@ -18,4 +18,4 @@ export OMP_PLACES=threads
 export OMP_PROC_BIND=spread
 
 #run the application:
-srun -n 20 -c 12 --cpu_bind=cores python gw_torch/make_synth_dataset/main-mpi.py
+srun -n 20 -c 12 --cpu_bind=cores python gw_torch/make_synth_spec_dataset/main-mpi.py
