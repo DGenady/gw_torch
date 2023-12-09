@@ -19,7 +19,7 @@ files_written = 0
 
 H_buffer = []
 L_buffer = []
-
+print_every = 100
 while H_files and L_files:
     if not H_buffer:
         h_file = H_files.pop(0)
@@ -41,6 +41,8 @@ while H_files and L_files:
     with open(os.path.join(output_path, output_file_name), "wb") as f:
         pickle.dump({"H": H_buffer.pop(0), "L": L_buffer.pop(0)}, f)
         files_written += 1
+    if files_written % print_every == 0:
+        print(f"files_writen: {files_written}, remaining - H: {len(H_files)} L: {len(L_files)}")
 
 with open("./specs_counts.txt", "w") as f:
     f.writelines([
