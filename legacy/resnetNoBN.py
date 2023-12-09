@@ -153,7 +153,7 @@ def resnet50NoBN(pretrained=False, progress=True, **kwargs):
     `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
-        progress (bool): If True, displays a progress bar of the download to stderr
+        progress (bool): If True, displays a progress bar of the download_data to stderr
     """
     return _resnet('resnet50', BottleneckNoBN, [3, 4, 6, 3], pretrained, progress,
                    **kwargs)

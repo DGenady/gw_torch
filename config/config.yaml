@@ -1,0 +1,36 @@
+project_config:
+  project_name: "m4443"
+  logs_dir_name: "ast_training_runs"
+
+run_config:
+  OGWSC_run: "O3"
+
+model_config:
+  label_dim: 32
+  fstride: 10
+  tstride: 10
+  input_fdim: 256
+  input_tdim: 256
+  imagenet_pretrain: False
+  audioset_pretrain: False
+  model_size: 'tiny224'
+
+training_config:
+  loader_n_workers: 4
+  train_frac: 0.75
+  lr: 0.00001
+  epochs: 40
+  batch_size: 1024
+
+  optimizer_config:
+    weight_decay: 0.00005
+    betas: (0.95, 0.999)
+
+  scheduler_config:
+    mode: 'min'
+    factor: 0.5
+    patience: 2
+    verbose: True
+
+  loss_fn_2_factor: 0.01
+

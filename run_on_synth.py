@@ -91,5 +91,3 @@ print(f"Using {device} device")
 project_name = 'm4443'
 GWOSC_run = 'O3'
 data_path = f"/global/cfs/cdirs/{project_name}/synth_data/{GWOSC_run}_synth/"
-
-
