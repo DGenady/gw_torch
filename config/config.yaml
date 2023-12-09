@@ -24,7 +24,7 @@ training_config:
 
   optimizer_config:
     weight_decay: 0.00005
-    betas: (0.95, 0.999)
+    betas: [0.95, 0.999]
 
   scheduler_config:
     mode: 'min'
@@ -38,8 +38,8 @@ data_config:
   highpass_freq: 20
   spec_duration: 2
   q_transform:
-    frange: (10, 2048)
-    qrange: (16, 16)
+    frange: [10, 2048]
+    qrange: [16, 16]
     whiten: True
     logf: True
 
