@@ -202,7 +202,7 @@ if __name__ == '__main__':
 
     start_time = time.time()
 
-    for epoch in epochs:
+    for epoch in range(epochs):
         epoch_loss, global_step = train_epoch(ast_model, train_loader, train_conf, global_step)
         val_loss = validation_step(ast_model, val_loader)
         train_losses.append(epoch_loss)
@@ -220,8 +220,3 @@ if __name__ == '__main__':
         scheduler.step(val_losses[-1])
     dist.destroy_process_group()
     print(f'Done in {(time.time() - start_time) / 60:.2f} minutes')
-
-
-
-
-
