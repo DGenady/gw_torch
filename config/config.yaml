@@ -11,7 +11,7 @@ model_config:
   tstride: 10
   input_fdim: 256
   input_tdim: 256
-  imagenet_pretrain: False
+  imagenet_pretrain: True
   audioset_pretrain: False
   model_size: 'tiny224'
 
