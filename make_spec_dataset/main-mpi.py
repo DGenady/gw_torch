@@ -1,7 +1,7 @@
 import os
 print(os.getcwd())
 import sys
-sys.path.append('/global/homes/t/tomerh/gw_torch')
+sys.path.append('/global/homes/g/gdevit/gw_torch')
 import pickle
 import numpy as np
 from gwpy.timeseries import TimeSeries
