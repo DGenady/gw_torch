@@ -3,7 +3,7 @@
 #SBATCH -C cpu
 #SBATCH -q regular
 #SBATCH -J make_ast_dataset_O1
-#SBATCH --mail-user=hacohen0tomer@gmail.com
+#SBATCH --mail-user=gdevit18@gmail.com
 #SBATCH --mail-type=ALL
 #SBATCH -t 04:30:00
 #SBATCH --account=m4443
@@ -18,4 +18,4 @@ export OMP_PLACES=threads
 export OMP_PROC_BIND=spread
 
 #run the application:
-srun -n 384 -c 2 --cpu_bind=cores python /global/homes/t/tomerh/gw_torch/make_spec_dataset/main-mpi.py
+srun -n 384 -c 2 --cpu_bind=cores python /global/homes/g/gdevit/gw_torch/make_spec_dataset/main-mpi.py
