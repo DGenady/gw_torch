@@ -38,6 +38,7 @@ def create_dataset(strain, segment_duration, **kwargs):
 
 
 def process_file(strain_file, detector, save_path):
+    print(type(strain_file))
     print(f"loading file... {strain_file}")
     strain = TimeSeries.read(strain_file, format='hdf5.gwosc', verbose=False)
     print("complete")
